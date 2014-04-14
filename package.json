@@ -1,0 +1,27 @@
+{
+  "name": "fxa-auth-db-server",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "tap test",
+    "start": "node ./bin/db_server.js 2>&1 | bunyan -o short"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dannycoates/fxa-auth-db-server"
+  },
+  "author": "",
+  "license": "MPL 2.0",
+  "bugs": {
+    "url": "https://github.com/dannycoates/fxa-auth-db-server/issues"
+  },
+  "homepage": "https://github.com/dannycoates/fxa-auth-db-server",
+  "dependencies": {
+    "restify": "2.7.0",
+    "mysql": "2.1.1",
+    "bluebird": "1.2.2",
+    "bunyan": "0.22.3",
+    "rc": "0.3.4"
+  }
+}
