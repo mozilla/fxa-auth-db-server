@@ -284,7 +284,7 @@ module.exports = function (log, error) {
     ' WHERE normalizedEmail = LOWER(?)'
 
   MySql.prototype.emailRecord = function (email) {
-    return this.readOne(EMAIL_RECORD, email)
+    return this.readOne(EMAIL_RECORD, Buffer(email, 'hex').toString('utf8'))
   }
 
   var ACCOUNT = 'SELECT uid, email, normalizedEmail, emailCode, emailVerified, kA,' +
