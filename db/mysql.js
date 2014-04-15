@@ -228,7 +228,7 @@ module.exports = function (log, error) {
     return this.readOne(ACCOUNT_EXISTS, email)
   }
 
-  var ACCOUNT_DEVICES = 'SELECT tokenId FROM sessionTokens WHERE uid = ?'
+  var ACCOUNT_DEVICES = 'SELECT tokenId as id FROM sessionTokens WHERE uid = ?'
 
   MySql.prototype.accountDevices = function (uid) {
     return this.read(ACCOUNT_DEVICES, uid)
