@@ -8,22 +8,22 @@ var bufferize = require('../bufferize')
 var config = require('../config')
 var log = require('../log')(config.logLevel, 'db-api')
 var DB = require('../db/mysql')(log, error)
+var package = require('../package.json')
 
 function startServer(db) {
 
   function reply(fn) {
     return function (req, res, next) {
-      log.trace(
-        {
-          op: 'request',
-          route: req.route.name,
-          id: req.params && req.params.id
-        }
-      )
       fn.call(db, req.params.id, req.body)
         .then(
           function (result) {
-            log.info({ op: 'request.summary' })
+            log.info(
+              {
+                op: 'request.summary',
+                route: req.route.name,
+                url: req.url
+              }
+            )
             if (Array.isArray(result)) {
               res.send(result.map(bufferize.unbuffer))
             }
@@ -32,7 +32,19 @@ function startServer(db) {
             }
           },
           function (err) {
-            log.error({ op: 'request.summary', err: err })
+            var statusCode = err.code || 500
+            var msg = {
+              op: 'request.summary',
+              route: req.route.name,
+              url: req.url,
+              err: err.message
+            }
+            if (statusCode >= 500) {
+              log.error(msg)
+            }
+            else {
+              log.warn(msg)
+            }
             res.send(err.code || 500, err)
           }
         )
@@ -76,6 +88,14 @@ function startServer(db) {
   api.head('/emailRecord/:id', reply(db.accountExists))
 
   api.get('/__heartbeat__', reply(db.ping))
+
+  api.get(
+    '/',
+    function (req, res, next) {
+      res.send({ version: package.version, patchLevel: db.patchLevel })
+      next()
+    }
+  )
 
   api.listen(
     config.port,

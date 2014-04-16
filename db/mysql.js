@@ -13,6 +13,7 @@ module.exports = function (log, error) {
   // make a pool of connections that we can draw from
   function MySql(options) {
 
+    this.patchLevel = 0
     // poolCluster will remove the pool after `removeNodeErrorCount` errors.
     // We don't ever want to remove a pool because we only have one pool
     // for writing and reading each. Connection errors are mostly out of our
@@ -72,13 +73,16 @@ module.exports = function (log, error) {
     return mysql.readOne("SELECT value FROM dbMetadata WHERE name = ?", options.patchKey)
       .then(
         function (result) {
-          var patchLevel = +result.value
-          if ( patchLevel !== options.patchLevel && patchLevel !== options.patchLevel + 1 ) {
+          mysql.patchLevel = +result.value
+          if (
+            mysql.patchLevel < options.patchLevel ||
+            mysql.patchLevel > options.patchLevel + 1
+          ) {
             throw new Error('dbIncorrectPatchLevel')
           }
           log.trace({
             op: 'MySql.connect',
-            patchLevel: patchLevel,
+            patchLevel: mysql.patchLevel,
             patchLevelRequired: options.patchLevel
           })
           return mysql
