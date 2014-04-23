@@ -419,6 +419,11 @@ module.exports = function (log, error) {
               accountResetToken.uid,
               accountResetToken.createdAt
             ]
+          ),
+          query(
+            connection,
+            VERIFY_EMAIL,
+            [accountResetToken.uid]
           )
         ])
       }
