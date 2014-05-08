@@ -12,6 +12,7 @@ module.exports = function (log, error) {
 
   // make a pool of connections that we can draw from
   function MySql(options) {
+    this.options = options
 
     this.patchLevel = 0
     // poolCluster will remove the pool after `removeNodeErrorCount` errors.
@@ -38,6 +39,25 @@ module.exports = function (log, error) {
       options.statInterval || 15000
     )
     this.statInterval.unref()
+
+    // prune tokens every so often
+    function prune() {
+      this.pruneTokens().done(
+        function() {
+          log.trace({ op: 'db.pruneTokens', msg: 'Finished' })
+        },
+        function(err) {
+          log.error({ op: 'db.pruneTokens', err: err })
+        }
+      )
+
+      var pruneIn = options.pruneEvery/2 + Math.floor(Math.random() * options.pruneEvery)
+      setTimeout(prune.bind(this), pruneIn).unref();
+    }
+    // start the pruning off, but only if enabled in config
+    if ( options.enablePruning ) {
+      prune.bind(this)()
+    }
   }
 
   function reportStats() {
@@ -589,6 +609,19 @@ module.exports = function (log, error) {
 
   // exposed for testing only
   MySql.prototype.retryable_ = retryable
+
+  var PRUNE = "CALL prune(?, ?)"
+  MySql.prototype.pruneTokens = function () {
+    log.trace({  op : 'MySql.pruneTokens' })
+
+    var now = Date.now()
+    var pruneBefore = now - this.options.pruneEvery
+
+    return this.write(
+      PRUNE,
+      [pruneBefore, now]
+    )
+  }
 
   return MySql
 }
