@@ -99,8 +99,9 @@ function startServer(db) {
 
   api.listen(
     config.port,
+    config.hostname,
     function () {
-      log.info({ op: 'listening', port: config.port })
+      log.info({ op: 'listening', port: config.port, host: config.hostname })
     }
   )
 }
