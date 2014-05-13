@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "tap test",
+    "test": "./scripts/tap-coverage.js test/local",
     "start": "node ./bin/db_server.js 2>&1 | bunyan -o short -c 'this.op !== \"stat\"'"
   },
   "repository": {
@@ -23,5 +23,9 @@
     "bluebird": "1.2.2",
     "bunyan": "0.22.3",
     "rc": "0.3.4"
+  },
+  "devDependencies": {
+    "tap": "0.4.9",
+    "ass": "0.0.5"
   }
 }
