@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dannycoates/fxa-auth-db-server"
+    "url": "https://github.com/mozilla/fxa-auth-db-server"
   },
   "author": "",
   "license": "MPL 2.0",
   "bugs": {
-    "url": "https://github.com/dannycoates/fxa-auth-db-server/issues"
+    "url": "https://github.com/mozilla/fxa-auth-db-server/issues"
   },
-  "homepage": "https://github.com/dannycoates/fxa-auth-db-server",
+  "homepage": "https://github.com/mozilla/fxa-auth-db-server",
   "dependencies": {
     "restify": "2.7.0",
     "mysql": "2.1.1",
