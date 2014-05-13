@@ -297,6 +297,23 @@ module.exports = function (log, error) {
 
   MySql.prototype.account = function (uid) {
     return this.readOne(ACCOUNT, uid)
+      .then(function(result) {
+        // need this to turn emailVerified from a number 0/1 to false/true
+        return {
+          uid: uid,
+          email: result.email,
+          normalizedEmail: result.normalizedEmail,
+          emailCode: result.emailCode,
+          emailVerified: !!result.emailVerified,
+          kA: result.kA,
+          wrapWrapKb: result.wrapWrapKb,
+          verifierVersion: result.verifierVersion,
+          verifyHash: result.verifyHash,
+          authSalt: result.authSalt,
+          verifierSetAt: result.verifierSetAt,
+          createdAt: result.createdAt
+        }
+      })
   }
 
   // UPDATE
