@@ -26,6 +26,10 @@
   },
   "devDependencies": {
     "tap": "0.4.9",
-    "ass": "0.0.5"
+    "ass": "0.0.5",
+    "grunt": "0.4.5",
+    "grunt-contrib-jshint": "0.10.0",
+    "grunt-copyright": "0.1.0",
+    "load-grunt-tasks": "0.4.0"
   }
 }
