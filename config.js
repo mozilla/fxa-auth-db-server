@@ -5,7 +5,8 @@
 module.exports = require('rc')(
   'fxa_db',
   {
-  	logLevel: 'trace',
+	logLevel: 'trace',
+    hostname: "127.0.0.1",
     port: 8000,
     patchKey: 'schema-patch-level',
     patchLevel: 2,
