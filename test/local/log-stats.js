@@ -5,7 +5,7 @@ var error = require('../../error')
 var config = require('../../config')
 
 config.logLevel = 'info'
-config.statInterval = 100;
+config.statInterval = 100
 
 var log = require('../../log')(config.logLevel, 'db-api')
 
