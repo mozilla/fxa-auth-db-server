@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "./scripts/tap-coverage.js test/local",
-    "start": "node ./bin/db_server.js 2>&1 | bunyan -o short -c 'this.op !== \"stat\"'"
+    "start": "node ./bin/db_server.js 2>&1 | bunyan -o short -c 'this.op !== \"stat\"'",
+    "contributors": "git shortlog -s -n | cut -c8- > CONTRIBUTORS.md"
   },
   "repository": {
     "type": "git",
