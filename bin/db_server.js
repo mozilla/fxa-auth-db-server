@@ -21,6 +21,7 @@ function startServer(db) {
               {
                 op: 'request.summary',
                 route: req.route.name,
+                method: req.method,
                 url: req.url
               }
             )
@@ -36,6 +37,7 @@ function startServer(db) {
             var msg = {
               op: 'request.summary',
               route: req.route.name,
+              method: req.method,
               url: req.url,
               err: err.message
             }
