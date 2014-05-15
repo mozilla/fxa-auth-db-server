@@ -1,7 +1,7 @@
 language: node_js
 
 node_js:
- - 0.10
+ - "0.10"
 
 services:
  - mysql
@@ -19,11 +19,7 @@ notifications:
 before_install: sudo apt-get install libcairo2-dev libjpeg8-dev libpango1.0-dev libgif-dev build-essential g++
 
 before_script:
-  - "mysql -e 'DROP DATABASE IF EXISTS fxa'"
-  - "mysql -e 'CREATE DATABASE fxa'"
-  # this a lame hack to bootstrap travis; should run db_patcher
-  - "cat db/schema/patch-000-001.sql | mysql fxa"
-  - "cat db/schema/patch-001-002.sql | mysql fxa"
+  - mysql -e 'DROP DATABASE IF EXISTS fxa'
 
 script:
   - npm test
