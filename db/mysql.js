@@ -199,6 +199,8 @@ module.exports = function (log, error) {
     ' VALUES (?, ?, ?, ?, ?, ?)'
 
   MySql.prototype.createPasswordForgotToken = function (tokenId, passwordForgotToken) {
+    passwordForgotToken.createdAt = Date.now()
+
     return this.write(
       CREATE_PASSWORD_FORGOT_TOKEN,
       [
@@ -217,6 +219,8 @@ module.exports = function (log, error) {
     ' VALUES (?, ?, ?, ?)'
 
   MySql.prototype.createPasswordChangeToken = function (tokenId, passwordChangeToken) {
+    passwordChangeToken.createdAt = Date.now()
+
     return this.write(
       CREATE_PASSWORD_CHANGE_TOKEN,
       [

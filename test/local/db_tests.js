@@ -27,29 +27,39 @@ var ACCOUNT = {
   wrapWrapKb: zeroBuffer32
 }
 
-function hex32() {
-  return Buffer(crypto.randomBytes(32).toString('hex'), 'hex')
+function hex(len) {
+  return Buffer(crypto.randomBytes(len).toString('hex'), 'hex')
 }
+function hex16() { return hex(16) }
+function hex32() { return hex(32) }
+function hex64() { return hex(64) }
+function hex96() { return hex(96) }
 
-function hex64() {
-  return Buffer(crypto.randomBytes(64).toString('hex'), 'hex')
-}
-
-function hex96() {
-  return Buffer(crypto.randomBytes(64).toString('hex'), 'hex')
-}
-
-var SESSION_TOKEN_ID = hex32();
+var SESSION_TOKEN_ID = hex32()
 var SESSION_TOKEN = {
   data : hex32(),
   uid : ACCOUNT.uid,
 }
 
-var KEY_FETCH_TOKEN_ID = hex32();
+var KEY_FETCH_TOKEN_ID = hex32()
 var KEY_FETCH_TOKEN = {
   authKey : hex32(),
   uid : ACCOUNT.uid,
   keyBundle : hex96(),
+}
+
+var PASSWORD_FORGOT_TOKEN_ID = hex32()
+var PASSWORD_FORGOT_TOKEN = {
+  data : hex32(),
+  uid : ACCOUNT.uid,
+  passCode : hex16(),
+  tries : 1,
+}
+
+var PASSWORD_CHANGE_TOKEN_ID = hex32()
+var PASSWORD_CHANGE_TOKEN = {
+  data : hex32(),
+  uid : ACCOUNT.uid,
 }
 
 DB.connect(config)
@@ -154,6 +164,47 @@ DB.connect(config)
               t.equal(token.emailVerified, ACCOUNT.emailVerified)
               // email is not returned
               // emailCode is not returned
+              t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+            })
+        }
+      )
+
+      test(
+        'forgot password token handling',
+        function (t) {
+          var token1;
+          var token1tries = 0
+          return db.createPasswordForgotToken(PASSWORD_FORGOT_TOKEN_ID, PASSWORD_FORGOT_TOKEN)
+            .then(function(result) {
+              t.deepEqual(result, {}, 'Returned an empty object on forgot password token creation')
+              return db.passwordForgotToken(PASSWORD_FORGOT_TOKEN_ID)
+            })
+            .then(function(token) {
+              // tokenId is not returned
+              t.deepEqual(token.tokenData, PASSWORD_FORGOT_TOKEN.data, 'token data matches')
+              t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
+              t.ok(token.createdAt, 'Got a createdAt')
+              t.deepEqual(token.passCode, PASSWORD_FORGOT_TOKEN.passCode)
+              t.equal(token.tries, PASSWORD_FORGOT_TOKEN.tries, 'Tries is correct')
+              t.equal(token.email, ACCOUNT.email)
+              t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+            })
+        }
+      )
+
+      test(
+        'change password token handling',
+        function (t) {
+          return db.createPasswordChangeToken(PASSWORD_CHANGE_TOKEN_ID, PASSWORD_CHANGE_TOKEN)
+            .then(function(result) {
+              t.deepEqual(result, {}, 'Returned an empty object on change password token creation')
+              return db.passwordChangeToken(PASSWORD_CHANGE_TOKEN_ID)
+            })
+            .then(function(token) {
+              // tokenId is not returned
+              t.deepEqual(token.tokenData, PASSWORD_CHANGE_TOKEN.data, 'token data matches')
+              t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
+              t.ok(token.createdAt, 'Got a createdAt')
               t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
             })
         }
