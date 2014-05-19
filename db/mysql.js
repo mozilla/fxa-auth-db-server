@@ -283,15 +283,32 @@ module.exports = function (log, error) {
   }
 
   var EMAIL_RECORD = 'SELECT uid, email, normalizedEmail, emailVerified, emailCode,' +
-    ' kA, wrapWrapKb, verifierVersion, verifyHash, authSalt, verifierSetAt' +
+    ' kA, wrapWrapKb, verifierVersion, verifyHash, authSalt, verifierSetAt, createdAt' +
     ' FROM accounts' +
     ' WHERE normalizedEmail = LOWER(?)'
 
   MySql.prototype.emailRecord = function (email) {
-    return this.readOne(EMAIL_RECORD, Buffer(email, 'hex').toString('utf8'))
+    return this.readOne(EMAIL_RECORD, email)
+      .then(function(result) {
+        // need this to turn emailVerified from a number 0/1 to false/true
+        return {
+          uid: result.uid,
+          email: result.email,
+          normalizedEmail: result.normalizedEmail,
+          emailCode: result.emailCode,
+          emailVerified: !!result.emailVerified,
+          kA: result.kA,
+          wrapWrapKb: result.wrapWrapKb,
+          verifierVersion: result.verifierVersion,
+          verifyHash: result.verifyHash,
+          authSalt: result.authSalt,
+          verifierSetAt: result.verifierSetAt,
+          createdAt: result.createdAt
+        }
+      })
   }
 
-  var ACCOUNT = 'SELECT uid, email, normalizedEmail, emailCode, emailVerified, kA,' +
+  var ACCOUNT = 'SELECT uid, email, normalizedEmail, emailVerified, emailCode, kA,' +
     ' wrapWrapKb, verifierVersion, verifyHash, authSalt, verifierSetAt, createdAt' +
     ' FROM accounts WHERE uid = ?'
 
@@ -300,7 +317,7 @@ module.exports = function (log, error) {
       .then(function(result) {
         // need this to turn emailVerified from a number 0/1 to false/true
         return {
-          uid: uid,
+          uid: result.uid,
           email: result.email,
           normalizedEmail: result.normalizedEmail,
           emailCode: result.emailCode,
