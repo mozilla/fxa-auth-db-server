@@ -211,6 +211,22 @@ DB.connect(config)
       )
 
       test(
+        'email verification',
+        function (t) {
+          return db.emailRecord(ACCOUNT.email)
+          .then(function(emailRecord) {
+            return db.verifyEmail(emailRecord.uid)
+          })
+          .then(function() {
+            return db.account(ACCOUNT.uid)
+          })
+          .then(function(account) {
+            t.ok(account.emailVerified, 'account should now be emailVerified')
+          })
+        }
+      )
+
+      test(
         'teardown',
         function (t) {
           return db.close()
