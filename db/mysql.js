@@ -146,6 +146,8 @@ module.exports = function (log, error) {
     ' VALUES (?, ?, ?, ?)'
 
   MySql.prototype.createSessionToken = function (tokenId, sessionToken) {
+    sessionToken.createdAt = Date.now()
+
     return this.write(
       CREATE_SESSION_TOKEN,
       [
@@ -245,6 +247,10 @@ module.exports = function (log, error) {
 
   MySql.prototype.sessionToken = function (id) {
     return this.readOne(SESSION_TOKEN, id)
+      .then(function(result) {
+        result.emailVerified = !!result.emailVerified
+        return result
+      })
   }
 
   var KEY_FETCH_TOKEN = 'SELECT t.authKey, t.uid, t.keyBundle, t.createdAt,' +

@@ -2,6 +2,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+var crypto = require('crypto')
+
 require('ass')
 var test = require('../ptaptest')
 var uuid = require('uuid')
@@ -23,6 +25,20 @@ var ACCOUNT = {
   authSalt: zeroBuffer32,
   kA: zeroBuffer32,
   wrapWrapKb: zeroBuffer32
+}
+
+function hex32() {
+  return Buffer(crypto.randomBytes(32).toString('hex'), 'hex')
+}
+
+function hex64() {
+  return Buffer(crypto.randomBytes(64).toString('hex'), 'hex')
+}
+
+var SESSION_TOKEN_ID = hex32();
+var SESSION_TOKEN = {
+  data : hex32(),
+  uid : ACCOUNT.uid,
 }
 
 DB.connect(config)
@@ -67,6 +83,7 @@ DB.connect(config)
             t.deepEqual(account.verifyHash, ACCOUNT.verifyHash)
             t.deepEqual(account.authSalt, ACCOUNT.authSalt)
             t.equal(account.verifierVersion, ACCOUNT.verifierVersion)
+            t.equal(account.verifierSetAt, account.createdAt, 'verifierSetAt has been set to the same as createdAt')
             t.ok(account.createdAt)
           })
           .then(function() {
@@ -83,8 +100,30 @@ DB.connect(config)
             t.deepEqual(account.verifyHash, ACCOUNT.verifyHash)
             t.deepEqual(account.authSalt, ACCOUNT.authSalt)
             t.equal(account.verifierVersion, ACCOUNT.verifierVersion)
+            t.equal(account.verifierSetAt, account.createdAt, 'verifierSetAt has been set to the same as createdAt')
             t.ok(account.createdAt)
           })
+        }
+      )
+
+      test(
+        'session token handling',
+        function (t) {
+          return db.createSessionToken(SESSION_TOKEN_ID, SESSION_TOKEN)
+            .then(function(result) {
+              t.deepEqual(result, {}, 'Returned an empty object on session token creation')
+              return db.sessionToken(SESSION_TOKEN_ID)
+            })
+            .then(function(sessionToken) {
+              // tokenId is not returned from db.sessionToken()
+              t.deepEqual(sessionToken.tokenData, SESSION_TOKEN.data, 'token data matches')
+              t.deepEqual(sessionToken.uid, ACCOUNT.uid)
+              t.ok(sessionToken.createdAt, 'Got a createdAt')
+              t.equal(sessionToken.emailVerified, ACCOUNT.emailVerified)
+              t.equal(sessionToken.email, ACCOUNT.email)
+              t.deepEqual(sessionToken.emailCode, ACCOUNT.emailCode)
+              t.ok(sessionToken.verifierSetAt, 'verifierSetAt is set to a truthy value')
+            })
         }
       )
 
