@@ -88,7 +88,15 @@ DB.connect(config)
       test(
         'account creation',
         function (t) {
-          return db.createAccount(ACCOUNT.uid, ACCOUNT)
+          return db.accountExists(ACCOUNT.email)
+          .then(function(exists) {
+            t.fail('account should not yet exist for this email address')
+          }, function(err) {
+            t.pass('ok, account could not be found')
+          })
+          .then(function() {
+            return db.createAccount(ACCOUNT.uid, ACCOUNT)
+          })
           .then(function(account) {
             t.deepEqual(account, {}, 'Returned an empty object on account creation')
             return db.accountExists(ACCOUNT.email)
@@ -392,7 +400,6 @@ DB.connect(config)
               return db.accountDevices(ACCOUNT.uid)
             })
             .then(function(devices) {
-              console.log('devices:', devices)
               t.equal(devices.length, 2, 'Account devices should be two')
               return devices[0]
             })
@@ -414,6 +421,52 @@ DB.connect(config)
             })
             .then(function(devices) {
               t.equal(devices.length, 0, 'Account devices should be zero')
+            })
+        }
+      )
+
+      test(
+        'db.resetAccount',
+        function (t) {
+          t.plan(2)
+          return db.createSessionToken(SESSION_TOKEN_ID, SESSION_TOKEN)
+            .then(function(sessionToken) {
+              return db.createAccountResetToken(ACCOUNT_RESET_TOKEN_ID, ACCOUNT_RESET_TOKEN)
+            })
+            .then(function() {
+              return db.resetAccount(ACCOUNT.uid, ACCOUNT)
+            })
+            .then(function(sessionToken) {
+              return db.accountDevices(ACCOUNT.uid)
+            })
+            .then(function(devices) {
+              t.equal(devices.length, 0, 'The devices length should be zero')
+            })
+            .then(function() {
+              // account should STILL exist for this email address
+              return db.accountExists(ACCOUNT.email)
+            })
+            .then(function(exists) {
+              t.ok(exists, 'account still exists ok')
+            }, function(err) {
+              t.fail('the account for this email address should still exist')
+            })
+        }
+      )
+
+      test(
+        'account deletion',
+        function (t) {
+          t.plan(1)
+          // account should no longer exist for this email address
+          return db.deleteAccount(ACCOUNT.uid)
+            .then(function() {
+              return db.accountExists(ACCOUNT.email)
+            })
+            .then(function(exists) {
+              t.fail('account should no longer exist for this email address')
+            }, function(err) {
+              t.pass('account no longer exists for this email address')
             })
         }
       )
