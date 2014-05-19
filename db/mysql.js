@@ -456,6 +456,8 @@ module.exports = function (log, error) {
   MySql.prototype.forgotPasswordVerified = function (tokenId, accountResetToken) {
     return this.transaction(
       function (connection) {
+        accountResetToken.createdAt = Date.now()
+
         return P.all([
           query(
             connection,

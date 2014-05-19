@@ -314,6 +314,111 @@ DB.connect(config)
       )
 
       test(
+        'db.forgotPasswordVerified',
+        function (t) {
+          t.plan(8)
+          // for this test, we are creating a new account with a different email address
+          // so that we can check that emailVerified turns from false to true (since
+          // we already set it to true earlier)
+          ACCOUNT.uid = uuid.v4('binary')
+          ACCOUNT.email = ('' + Math.random()).substr(2) + '@bar.com'
+          PASSWORD_FORGOT_TOKEN.uid = ACCOUNT.uid
+          ACCOUNT_RESET_TOKEN.uid = ACCOUNT.uid
+          ACCOUNT_RESET_TOKEN.tokenId = ACCOUNT_RESET_TOKEN_ID
+
+          return db.createAccount(ACCOUNT.uid, ACCOUNT)
+            .then(function() {
+              return db.emailRecord(ACCOUNT.email)
+            })
+            .then(function(result) {
+              return db.createPasswordForgotToken(PASSWORD_FORGOT_TOKEN_ID, PASSWORD_FORGOT_TOKEN)
+            })
+            .then(function(passwordForgotToken) {
+              return db.forgotPasswordVerified(PASSWORD_FORGOT_TOKEN_ID, ACCOUNT_RESET_TOKEN)
+            })
+            .then(function() {
+              return db.passwordForgotToken(PASSWORD_FORGOT_TOKEN_ID)
+            })
+            .then(function(token) {
+              t.fail('Password Forgot Token should no longer exist')
+            }, function(err) {
+              t.pass('Password Forgot Token deleted successfully')
+            })
+            .then(function() {
+              return db.accountResetToken(ACCOUNT_RESET_TOKEN_ID)
+            })
+            .then(function(accountResetToken) {
+              // tokenId is not returned
+              t.deepEqual(accountResetToken.uid, ACCOUNT.uid, 'token belongs to this account')
+              t.deepEqual(accountResetToken.tokenData, ACCOUNT_RESET_TOKEN.data, 'token data matches')
+              t.ok(accountResetToken.createdAt, 'Got a createdAt')
+              t.ok(accountResetToken.verifierSetAt, 'verifierSetAt is set to a truthy value')
+            })
+            .then(function() {
+              return db.account(ACCOUNT.uid)
+            })
+            .then(function(account) {
+              t.ok(account.emailVerified, 'account should now be emailVerified')
+            })
+            .then(function() {
+              return db.deleteAccountResetToken(ACCOUNT_RESET_TOKEN_ID)
+            })
+            .then(function(result) {
+              t.deepEqual(result, {}, 'Returned an empty object on account reset deletion')
+              return db.accountResetToken(ACCOUNT_RESET_TOKEN_ID)
+            })
+            .then(function(token) {
+              t.fail('Account Reset Token should no longer exist')
+            }, function(err) {
+              t.pass('Account Reset Token deleted successfully')
+            })
+        }
+      )
+
+      test(
+        'db.accountDevices',
+        function (t) {
+          t.plan(3)
+          var anotherSessionTokenId = hex32()
+          var anotherSessionToken = {
+            data : hex32(),
+            uid : ACCOUNT.uid,
+          }
+          db.createSessionToken(SESSION_TOKEN_ID, SESSION_TOKEN)
+            .then(function(sessionToken) {
+              return db.createSessionToken(anotherSessionTokenId, anotherSessionToken)
+            })
+            .then(function() {
+              return db.accountDevices(ACCOUNT.uid)
+            })
+            .then(function(devices) {
+              console.log('devices:', devices)
+              t.equal(devices.length, 2, 'Account devices should be two')
+              return devices[0]
+            })
+            .then(function(sessionToken) {
+              return db.deleteSessionToken(SESSION_TOKEN_ID)
+            })
+            .then(function(sessionToken) {
+              return db.accountDevices(ACCOUNT.uid)
+            })
+            .then(function(devices) {
+              t.equal(devices.length, 1, 'Account devices should be one')
+              return devices[0]
+            })
+            .then(function(sessionToken) {
+              return db.deleteSessionToken(anotherSessionTokenId)
+            })
+            .then(function(sessionToken) {
+              return db.accountDevices(ACCOUNT.uid)
+            })
+            .then(function(devices) {
+              t.equal(devices.length, 0, 'Account devices should be zero')
+            })
+        }
+      )
+
+      test(
         'teardown',
         function (t) {
           return db.close()
