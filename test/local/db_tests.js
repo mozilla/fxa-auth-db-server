@@ -145,11 +145,23 @@ DB.connect(config)
               t.deepEqual(token.emailCode, ACCOUNT.emailCode)
               t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
             })
+            .then(function() {
+              return db.deleteSessionToken(SESSION_TOKEN_ID)
+            })
+            .then(function(result) {
+              t.deepEqual(result, {}, 'Returned an empty object on forgot key fetch token deletion')
+              return db.sessionToken(SESSION_TOKEN_ID)
+            })
+            .then(function(token) {
+              t.fail('Session Token should no longer exist')
+            }, function(err) {
+              t.pass('Session Token deleted successfully')
+            })
         }
       )
 
       test(
-        'key token handling',
+        'key fetch token handling',
         function (t) {
           return db.createKeyFetchToken(KEY_FETCH_TOKEN_ID, KEY_FETCH_TOKEN)
             .then(function(result) {
@@ -166,14 +178,24 @@ DB.connect(config)
               // emailCode is not returned
               t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
             })
+            .then(function() {
+              return db.deleteKeyFetchToken(KEY_FETCH_TOKEN_ID)
+            })
+            .then(function(result) {
+              t.deepEqual(result, {}, 'Returned an empty object on forgot key fetch token deletion')
+              return db.keyFetchToken(KEY_FETCH_TOKEN_ID)
+            })
+            .then(function(token) {
+              t.fail('Key Fetch Token should no longer exist')
+            }, function(err) {
+              t.pass('Key Fetch Token deleted successfully')
+            })
         }
       )
 
       test(
         'forgot password token handling',
         function (t) {
-          var token1;
-          var token1tries = 0
           return db.createPasswordForgotToken(PASSWORD_FORGOT_TOKEN_ID, PASSWORD_FORGOT_TOKEN)
             .then(function(result) {
               t.deepEqual(result, {}, 'Returned an empty object on forgot password token creation')
@@ -188,6 +210,18 @@ DB.connect(config)
               t.equal(token.tries, PASSWORD_FORGOT_TOKEN.tries, 'Tries is correct')
               t.equal(token.email, ACCOUNT.email)
               t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+            })
+            .then(function() {
+              return db.deletePasswordForgotToken(PASSWORD_FORGOT_TOKEN_ID)
+            })
+            .then(function(result) {
+              t.deepEqual(result, {}, 'Returned an empty object on forgot password token deletion')
+              return db.passwordForgotToken(PASSWORD_FORGOT_TOKEN_ID)
+            })
+            .then(function(token) {
+              t.fail('Password Forgot Token should no longer exist')
+            }, function(err) {
+              t.pass('Password Forgot Token deleted successfully')
             })
         }
       )
@@ -206,6 +240,18 @@ DB.connect(config)
               t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
               t.ok(token.createdAt, 'Got a createdAt')
               t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+            })
+            .then(function() {
+              return db.deletePasswordChangeToken(PASSWORD_CHANGE_TOKEN_ID)
+            })
+            .then(function(result) {
+              t.deepEqual(result, {}, 'Returned an empty object on forgot password change deletion')
+              return db.passwordChangeToken(PASSWORD_CHANGE_TOKEN_ID)
+            })
+            .then(function(token) {
+              t.fail('Password Change Token should no longer exist')
+            }, function(err) {
+              t.pass('Password Change Token deleted successfully')
             })
         }
       )
