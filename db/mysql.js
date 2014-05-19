@@ -183,6 +183,8 @@ module.exports = function (log, error) {
     ' VALUES (?, ?, ?, ?)'
 
   MySql.prototype.createAccountResetToken = function (tokenId, accountResetToken) {
+    accountResetToken.createdAt = Date.now()
+
     return this.write(
       CREATE_ACCOUNT_RESET_TOKEN,
       [

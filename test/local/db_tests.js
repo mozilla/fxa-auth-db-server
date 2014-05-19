@@ -62,6 +62,12 @@ var PASSWORD_CHANGE_TOKEN = {
   uid : ACCOUNT.uid,
 }
 
+var ACCOUNT_RESET_TOKEN_ID = hex32()
+var ACCOUNT_RESET_TOKEN = {
+  data : hex32(),
+  uid : ACCOUNT.uid,
+}
+
 DB.connect(config)
   .then(
     function (db) {
@@ -130,6 +136,7 @@ DB.connect(config)
       test(
         'session token handling',
         function (t) {
+          t.plan(10)
           return db.createSessionToken(SESSION_TOKEN_ID, SESSION_TOKEN)
             .then(function(result) {
               t.deepEqual(result, {}, 'Returned an empty object on session token creation')
@@ -163,6 +170,7 @@ DB.connect(config)
       test(
         'key fetch token handling',
         function (t) {
+          t.plan(8)
           return db.createKeyFetchToken(KEY_FETCH_TOKEN_ID, KEY_FETCH_TOKEN)
             .then(function(result) {
               t.deepEqual(result, {}, 'Returned an empty object on key fetch token creation')
@@ -196,6 +204,7 @@ DB.connect(config)
       test(
         'forgot password token handling',
         function (t) {
+          t.plan(10)
           return db.createPasswordForgotToken(PASSWORD_FORGOT_TOKEN_ID, PASSWORD_FORGOT_TOKEN)
             .then(function(result) {
               t.deepEqual(result, {}, 'Returned an empty object on forgot password token creation')
@@ -229,6 +238,7 @@ DB.connect(config)
       test(
         'change password token handling',
         function (t) {
+          t.plan(7)
           return db.createPasswordChangeToken(PASSWORD_CHANGE_TOKEN_ID, PASSWORD_CHANGE_TOKEN)
             .then(function(result) {
               t.deepEqual(result, {}, 'Returned an empty object on change password token creation')
@@ -269,6 +279,37 @@ DB.connect(config)
           .then(function(account) {
             t.ok(account.emailVerified, 'account should now be emailVerified')
           })
+        }
+      )
+
+      test(
+        'account reset token handling',
+        function (t) {
+          t.plan(7)
+          return db.createAccountResetToken(ACCOUNT_RESET_TOKEN_ID, ACCOUNT_RESET_TOKEN)
+            .then(function(result) {
+              t.deepEqual(result, {}, 'Returned an empty object on account reset token creation')
+              return db.accountResetToken(ACCOUNT_RESET_TOKEN_ID)
+            })
+            .then(function(token) {
+              // tokenId is not returned
+              t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
+              t.deepEqual(token.tokenData, ACCOUNT_RESET_TOKEN.data, 'token data matches')
+              t.ok(token.createdAt, 'Got a createdAt')
+              t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+            })
+            .then(function() {
+              return db.deleteAccountResetToken(ACCOUNT_RESET_TOKEN_ID)
+            })
+            .then(function(result) {
+              t.deepEqual(result, {}, 'Returned an empty object on account reset deletion')
+              return db.accountResetToken(ACCOUNT_RESET_TOKEN_ID)
+            })
+            .then(function(token) {
+              t.fail('Account Reset Token should no longer exist')
+            }, function(err) {
+              t.pass('Account Reset Token deleted successfully')
+            })
         }
       )
 
