@@ -164,6 +164,8 @@ module.exports = function (log, error) {
     ' VALUES (?, ?, ?, ?, ?)'
 
   MySql.prototype.createKeyFetchToken = function (tokenId, keyFetchToken) {
+    keyFetchToken.createdAt = Date.now()
+
     return this.write(
       CREATE_KEY_FETCH_TOKEN,
       [
@@ -260,6 +262,10 @@ module.exports = function (log, error) {
 
   MySql.prototype.keyFetchToken = function (id) {
     return this.readOne(KEY_FETCH_TOKEN, id)
+      .then(function(result) {
+        result.emailVerified = !!result.emailVerified
+        return result
+      })
   }
 
   var ACCOUNT_RESET_TOKEN = 'SELECT t.uid, t.tokenData, t.createdAt,' +

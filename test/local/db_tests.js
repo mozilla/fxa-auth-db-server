@@ -35,10 +35,21 @@ function hex64() {
   return Buffer(crypto.randomBytes(64).toString('hex'), 'hex')
 }
 
+function hex96() {
+  return Buffer(crypto.randomBytes(64).toString('hex'), 'hex')
+}
+
 var SESSION_TOKEN_ID = hex32();
 var SESSION_TOKEN = {
   data : hex32(),
   uid : ACCOUNT.uid,
+}
+
+var KEY_FETCH_TOKEN_ID = hex32();
+var KEY_FETCH_TOKEN = {
+  authKey : hex32(),
+  uid : ACCOUNT.uid,
+  keyBundle : hex96(),
 }
 
 DB.connect(config)
@@ -114,15 +125,36 @@ DB.connect(config)
               t.deepEqual(result, {}, 'Returned an empty object on session token creation')
               return db.sessionToken(SESSION_TOKEN_ID)
             })
-            .then(function(sessionToken) {
+            .then(function(token) {
               // tokenId is not returned from db.sessionToken()
-              t.deepEqual(sessionToken.tokenData, SESSION_TOKEN.data, 'token data matches')
-              t.deepEqual(sessionToken.uid, ACCOUNT.uid)
-              t.ok(sessionToken.createdAt, 'Got a createdAt')
-              t.equal(sessionToken.emailVerified, ACCOUNT.emailVerified)
-              t.equal(sessionToken.email, ACCOUNT.email)
-              t.deepEqual(sessionToken.emailCode, ACCOUNT.emailCode)
-              t.ok(sessionToken.verifierSetAt, 'verifierSetAt is set to a truthy value')
+              t.deepEqual(token.tokenData, SESSION_TOKEN.data, 'token data matches')
+              t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
+              t.ok(token.createdAt, 'Got a createdAt')
+              t.equal(token.emailVerified, ACCOUNT.emailVerified)
+              t.equal(token.email, ACCOUNT.email)
+              t.deepEqual(token.emailCode, ACCOUNT.emailCode)
+              t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+            })
+        }
+      )
+
+      test(
+        'key token handling',
+        function (t) {
+          return db.createKeyFetchToken(KEY_FETCH_TOKEN_ID, KEY_FETCH_TOKEN)
+            .then(function(result) {
+              t.deepEqual(result, {}, 'Returned an empty object on key fetch token creation')
+              return db.keyFetchToken(KEY_FETCH_TOKEN_ID)
+            })
+            .then(function(token) {
+              // tokenId is not returned
+              t.deepEqual(token.authKey, KEY_FETCH_TOKEN.authKey, 'authKey matches')
+              t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
+              t.ok(token.createdAt, 'Got a createdAt')
+              t.equal(token.emailVerified, ACCOUNT.emailVerified)
+              // email is not returned
+              // emailCode is not returned
+              t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
             })
         }
       )
