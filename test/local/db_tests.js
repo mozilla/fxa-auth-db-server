@@ -328,11 +328,30 @@ DB.connect(config)
           // for this test, we are creating a new account with a different email address
           // so that we can check that emailVerified turns from false to true (since
           // we already set it to true earlier)
-          ACCOUNT.uid = uuid.v4('binary')
-          ACCOUNT.email = ('' + Math.random()).substr(2) + '@bar.com'
-          PASSWORD_FORGOT_TOKEN.uid = ACCOUNT.uid
-          ACCOUNT_RESET_TOKEN.uid = ACCOUNT.uid
-          ACCOUNT_RESET_TOKEN.tokenId = ACCOUNT_RESET_TOKEN_ID
+          var ACCOUNT = {
+            uid: uuid.v4('binary'),
+            email: ('' + Math.random()).substr(2) + '@bar.com',
+            emailCode: zeroBuffer16,
+            emailVerified: false,
+            verifierVersion: 1,
+            verifyHash: zeroBuffer32,
+            authSalt: zeroBuffer32,
+            kA: zeroBuffer32,
+            wrapWrapKb: zeroBuffer32
+          }
+          var PASSWORD_FORGOT_TOKEN_ID = hex32()
+          var PASSWORD_FORGOT_TOKEN = {
+            data : hex32(),
+            uid : ACCOUNT.uid,
+            passCode : hex16(),
+            tries : 1,
+          }
+          var ACCOUNT_RESET_TOKEN_ID = hex32()
+          var ACCOUNT_RESET_TOKEN = {
+            tokenId : ACCOUNT_RESET_TOKEN_ID,
+            data : hex32(),
+            uid : ACCOUNT.uid,
+          }
 
           return db.createAccount(ACCOUNT.uid, ACCOUNT)
             .then(function() {
