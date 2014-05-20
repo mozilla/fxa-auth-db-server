@@ -10,6 +10,23 @@ var log = require('../log')(config.logLevel, 'db-api')
 var DB = require('../db/mysql')(log, error)
 var package = require('../package.json')
 
+var MemoryMonitor = require('../memory_monitor')
+var memoryMonitor = new MemoryMonitor()
+memoryMonitor.on(
+  'mem',
+  function (usage) {
+    log.stat(
+      {
+        stat: 'mem',
+        rss: usage.rss,
+        heapTotal: usage.heapTotal,
+        heapUsed: usage.heapUsed
+      }
+    )
+  }
+)
+memoryMonitor.start()
+
 function startServer(db) {
 
   function reply(fn) {
