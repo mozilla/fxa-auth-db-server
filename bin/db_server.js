@@ -27,6 +27,14 @@ memoryMonitor.on(
 )
 memoryMonitor.start()
 
+process.on(
+  'uncaughtException',
+  function (err) {
+    log.fatal(err)
+    process.exit(1)
+  }
+)
+
 function startServer(db) {
 
   function reply(fn) {
