@@ -244,10 +244,6 @@ module.exports = function (log, error) {
 
   MySql.prototype.sessionToken = function (id) {
     return this.readOne(SESSION_TOKEN, id)
-      .then(function(result) {
-        result.emailVerified = !!result.emailVerified
-        return result
-      })
   }
 
   var KEY_FETCH_TOKEN = 'SELECT t.authKey, t.uid, t.keyBundle, t.createdAt,' +
@@ -257,10 +253,6 @@ module.exports = function (log, error) {
 
   MySql.prototype.keyFetchToken = function (id) {
     return this.readOne(KEY_FETCH_TOKEN, id)
-      .then(function(result) {
-        result.emailVerified = !!result.emailVerified
-        return result
-      })
   }
 
   var ACCOUNT_RESET_TOKEN = 'SELECT t.uid, t.tokenData, t.createdAt,' +
@@ -296,23 +288,6 @@ module.exports = function (log, error) {
 
   MySql.prototype.emailRecord = function (email) {
     return this.readOne(EMAIL_RECORD, email)
-      .then(function(result) {
-        // need this to turn emailVerified from a number 0/1 to false/true
-        return {
-          uid: result.uid,
-          email: result.email,
-          normalizedEmail: result.normalizedEmail,
-          emailCode: result.emailCode,
-          emailVerified: !!result.emailVerified,
-          kA: result.kA,
-          wrapWrapKb: result.wrapWrapKb,
-          verifierVersion: result.verifierVersion,
-          verifyHash: result.verifyHash,
-          authSalt: result.authSalt,
-          verifierSetAt: result.verifierSetAt,
-          createdAt: result.createdAt
-        }
-      })
   }
 
   var ACCOUNT = 'SELECT uid, email, normalizedEmail, emailVerified, emailCode, kA,' +
@@ -321,23 +296,6 @@ module.exports = function (log, error) {
 
   MySql.prototype.account = function (uid) {
     return this.readOne(ACCOUNT, uid)
-      .then(function(result) {
-        // need this to turn emailVerified from a number 0/1 to false/true
-        return {
-          uid: result.uid,
-          email: result.email,
-          normalizedEmail: result.normalizedEmail,
-          emailCode: result.emailCode,
-          emailVerified: !!result.emailVerified,
-          kA: result.kA,
-          wrapWrapKb: result.wrapWrapKb,
-          verifierVersion: result.verifierVersion,
-          verifyHash: result.verifyHash,
-          authSalt: result.authSalt,
-          verifierSetAt: result.verifierSetAt,
-          createdAt: result.createdAt
-        }
-      })
   }
 
   // UPDATE
