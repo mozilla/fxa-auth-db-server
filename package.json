@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node ./bin/db_patcher.js &>/dev/null && ./scripts/tap-coverage.js test/local",
-    "start": "node ./bin/db_server.js 2>&1 | bunyan -o short -c 'this.op !== \"stat\"'"
+    "start": "node ./bin/db_patcher.js &>/dev/null && node ./bin/db_server.js 2>&1 | bunyan -o short -c 'this.op !== \"stat\"'"
   },
   "repository": {
     "type": "git",
