@@ -120,6 +120,7 @@ module.exports = function (log, error) {
 
   MySql.prototype.createAccount = function (uid, data) {
     data.normalizedEmail = data.email
+    data.createdAt = data.verifierSetAt = Date.now()
 
     return this.write(
       CREATE_ACCOUNT,
@@ -287,10 +288,10 @@ module.exports = function (log, error) {
     ' WHERE normalizedEmail = LOWER(?)'
 
   MySql.prototype.emailRecord = function (email) {
-    return this.readOne(EMAIL_RECORD, email)
+    return this.readOne(EMAIL_RECORD, Buffer(email, 'hex').toString('utf8'))
   }
 
-  var ACCOUNT = 'SELECT uid, email, normalizedEmail, emailVerified, emailCode, kA,' +
+  var ACCOUNT = 'SELECT uid, email, normalizedEmail, emailCode, emailVerified, kA,' +
     ' wrapWrapKb, verifierVersion, verifyHash, authSalt, verifierSetAt, createdAt' +
     ' FROM accounts WHERE uid = ?'
 

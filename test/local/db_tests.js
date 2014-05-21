@@ -26,7 +26,6 @@ var ACCOUNT = {
   kA: zeroBuffer32,
   wrapWrapKb: zeroBuffer32,
   verifierSetAt: Date.now(),
-  createdAt: Date.now(),
 }
 
 function hex(len) {
@@ -131,7 +130,8 @@ DB.connect(config)
           })
           .then(function() {
             t.pass('Retrieving account using email')
-            return db.emailRecord(ACCOUNT.email)
+            var hexEmail = Buffer(ACCOUNT.email).toString('hex')
+            return db.emailRecord(hexEmail)
           })
           .then(function(account) {
             t.deepEqual(account.uid, ACCOUNT.uid)
@@ -284,7 +284,8 @@ DB.connect(config)
       test(
         'email verification',
         function (t) {
-          return db.emailRecord(ACCOUNT.email)
+          var hexEmail = Buffer(ACCOUNT.email).toString('hex')
+          return db.emailRecord(hexEmail)
           .then(function(emailRecord) {
             return db.verifyEmail(emailRecord.uid)
           })
@@ -347,7 +348,6 @@ DB.connect(config)
             kA: zeroBuffer32,
             wrapWrapKb: zeroBuffer32,
             verifierSetAt: Date.now(),
-            createdAt: Date.now(),
           }
           var PASSWORD_FORGOT_TOKEN_ID = hex32()
           var PASSWORD_FORGOT_TOKEN = {
@@ -367,7 +367,8 @@ DB.connect(config)
 
           return db.createAccount(ACCOUNT.uid, ACCOUNT)
             .then(function() {
-              return db.emailRecord(ACCOUNT.email)
+              var hexEmail = Buffer(ACCOUNT.email).toString('hex')
+              return db.emailRecord(hexEmail)
             })
             .then(function(result) {
               return db.createPasswordForgotToken(PASSWORD_FORGOT_TOKEN_ID, PASSWORD_FORGOT_TOKEN)
