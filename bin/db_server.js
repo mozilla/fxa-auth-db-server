@@ -31,7 +31,7 @@ process.on(
   'uncaughtException',
   function (err) {
     log.fatal(err)
-    process.exit(1)
+    process.exit(8)
   }
 )
 
