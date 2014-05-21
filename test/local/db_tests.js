@@ -24,7 +24,9 @@ var ACCOUNT = {
   verifyHash: zeroBuffer32,
   authSalt: zeroBuffer32,
   kA: zeroBuffer32,
-  wrapWrapKb: zeroBuffer32
+  wrapWrapKb: zeroBuffer32,
+  verifierSetAt: Date.now(),
+  createdAt: Date.now(),
 }
 
 function hex(len) {
@@ -39,6 +41,7 @@ var SESSION_TOKEN_ID = hex32()
 var SESSION_TOKEN = {
   data : hex32(),
   uid : ACCOUNT.uid,
+  createdAt: Date.now(),
 }
 
 var KEY_FETCH_TOKEN_ID = hex32()
@@ -46,6 +49,7 @@ var KEY_FETCH_TOKEN = {
   authKey : hex32(),
   uid : ACCOUNT.uid,
   keyBundle : hex96(),
+  createdAt: Date.now(),
 }
 
 var PASSWORD_FORGOT_TOKEN_ID = hex32()
@@ -54,18 +58,21 @@ var PASSWORD_FORGOT_TOKEN = {
   uid : ACCOUNT.uid,
   passCode : hex16(),
   tries : 1,
+  createdAt: Date.now(),
 }
 
 var PASSWORD_CHANGE_TOKEN_ID = hex32()
 var PASSWORD_CHANGE_TOKEN = {
   data : hex32(),
   uid : ACCOUNT.uid,
+  createdAt: Date.now(),
 }
 
 var ACCOUNT_RESET_TOKEN_ID = hex32()
 var ACCOUNT_RESET_TOKEN = {
   data : hex32(),
   uid : ACCOUNT.uid,
+  createdAt: Date.now(),
 }
 
 DB.connect(config)
@@ -88,6 +95,7 @@ DB.connect(config)
       test(
         'account creation',
         function (t) {
+          t.plan(26)
           return db.accountExists(ACCOUNT.email)
           .then(function(exists) {
             t.fail('account should not yet exist for this email address')
@@ -135,8 +143,7 @@ DB.connect(config)
             t.deepEqual(account.verifyHash, ACCOUNT.verifyHash)
             t.deepEqual(account.authSalt, ACCOUNT.authSalt)
             t.equal(account.verifierVersion, ACCOUNT.verifierVersion)
-            t.equal(account.verifierSetAt, account.createdAt, 'verifierSetAt has been set to the same as createdAt')
-            t.ok(account.createdAt)
+            t.ok(account.verifierSetAt, 'verifierSetAt is set to a truthy value')
           })
         }
       )
@@ -324,7 +331,7 @@ DB.connect(config)
       test(
         'db.forgotPasswordVerified',
         function (t) {
-          t.plan(8)
+          t.plan(7)
           // for this test, we are creating a new account with a different email address
           // so that we can check that emailVerified turns from false to true (since
           // we already set it to true earlier)
@@ -337,7 +344,9 @@ DB.connect(config)
             verifyHash: zeroBuffer32,
             authSalt: zeroBuffer32,
             kA: zeroBuffer32,
-            wrapWrapKb: zeroBuffer32
+            wrapWrapKb: zeroBuffer32,
+            verifierSetAt: Date.now(),
+            createdAt: Date.now(),
           }
           var PASSWORD_FORGOT_TOKEN_ID = hex32()
           var PASSWORD_FORGOT_TOKEN = {
@@ -345,12 +354,14 @@ DB.connect(config)
             uid : ACCOUNT.uid,
             passCode : hex16(),
             tries : 1,
+            createdAt: Date.now(),
           }
           var ACCOUNT_RESET_TOKEN_ID = hex32()
           var ACCOUNT_RESET_TOKEN = {
             tokenId : ACCOUNT_RESET_TOKEN_ID,
             data : hex32(),
             uid : ACCOUNT.uid,
+            createdAt: Date.now(),
           }
 
           return db.createAccount(ACCOUNT.uid, ACCOUNT)
@@ -378,7 +389,6 @@ DB.connect(config)
               // tokenId is not returned
               t.deepEqual(accountResetToken.uid, ACCOUNT.uid, 'token belongs to this account')
               t.deepEqual(accountResetToken.tokenData, ACCOUNT_RESET_TOKEN.data, 'token data matches')
-              t.ok(accountResetToken.createdAt, 'Got a createdAt')
               t.ok(accountResetToken.verifierSetAt, 'verifierSetAt is set to a truthy value')
             })
             .then(function() {
@@ -410,6 +420,7 @@ DB.connect(config)
           var anotherSessionToken = {
             data : hex32(),
             uid : ACCOUNT.uid,
+            createdAt: Date.now(),
           }
           db.createSessionToken(SESSION_TOKEN_ID, SESSION_TOKEN)
             .then(function(sessionToken) {

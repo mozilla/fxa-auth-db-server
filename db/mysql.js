@@ -120,7 +120,6 @@ module.exports = function (log, error) {
 
   MySql.prototype.createAccount = function (uid, data) {
     data.normalizedEmail = data.email
-    data.createdAt = data.verifierSetAt = Date.now()
 
     return this.write(
       CREATE_ACCOUNT,
@@ -146,8 +145,6 @@ module.exports = function (log, error) {
     ' VALUES (?, ?, ?, ?)'
 
   MySql.prototype.createSessionToken = function (tokenId, sessionToken) {
-    sessionToken.createdAt = Date.now()
-
     return this.write(
       CREATE_SESSION_TOKEN,
       [
@@ -164,8 +161,6 @@ module.exports = function (log, error) {
     ' VALUES (?, ?, ?, ?, ?)'
 
   MySql.prototype.createKeyFetchToken = function (tokenId, keyFetchToken) {
-    keyFetchToken.createdAt = Date.now()
-
     return this.write(
       CREATE_KEY_FETCH_TOKEN,
       [
@@ -183,8 +178,6 @@ module.exports = function (log, error) {
     ' VALUES (?, ?, ?, ?)'
 
   MySql.prototype.createAccountResetToken = function (tokenId, accountResetToken) {
-    accountResetToken.createdAt = Date.now()
-
     return this.write(
       CREATE_ACCOUNT_RESET_TOKEN,
       [
@@ -201,8 +194,6 @@ module.exports = function (log, error) {
     ' VALUES (?, ?, ?, ?, ?, ?)'
 
   MySql.prototype.createPasswordForgotToken = function (tokenId, passwordForgotToken) {
-    passwordForgotToken.createdAt = Date.now()
-
     return this.write(
       CREATE_PASSWORD_FORGOT_TOKEN,
       [
@@ -221,8 +212,6 @@ module.exports = function (log, error) {
     ' VALUES (?, ?, ?, ?)'
 
   MySql.prototype.createPasswordChangeToken = function (tokenId, passwordChangeToken) {
-    passwordChangeToken.createdAt = Date.now()
-
     return this.write(
       CREATE_PASSWORD_CHANGE_TOKEN,
       [
@@ -301,7 +290,7 @@ module.exports = function (log, error) {
   }
 
   var EMAIL_RECORD = 'SELECT uid, email, normalizedEmail, emailVerified, emailCode,' +
-    ' kA, wrapWrapKb, verifierVersion, verifyHash, authSalt, verifierSetAt, createdAt' +
+    ' kA, wrapWrapKb, verifierVersion, verifyHash, authSalt, verifierSetAt' +
     ' FROM accounts' +
     ' WHERE normalizedEmail = LOWER(?)'
 
@@ -456,8 +445,6 @@ module.exports = function (log, error) {
   MySql.prototype.forgotPasswordVerified = function (tokenId, accountResetToken) {
     return this.transaction(
       function (connection) {
-        accountResetToken.createdAt = Date.now()
-
         return P.all([
           query(
             connection,
