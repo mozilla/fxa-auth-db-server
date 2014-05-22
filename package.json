@@ -4,7 +4,7 @@
   "description": "Firefox Accounts DB Server",
   "main": "index.js",
   "scripts": {
-    "test": "node ./bin/db_patcher.js &>/dev/null && ./scripts/tap-coverage.js test/local",
+    "test": "node ./bin/db_patcher.js &>/dev/null && ./scripts/tap-coverage.js test/local test/remote",
     "start": "node ./bin/db_patcher.js &>/dev/null && node ./bin/db_server.js 2>&1 | bunyan -o short -c 'this.op !== \"stat\"'"
   },
   "repository": {
@@ -31,10 +31,11 @@
     "grunt-contrib-jshint": "0.10.0",
     "grunt-copyright": "0.1.0",
     "load-grunt-tasks": "0.4.0",
-    "tap": "0.4.9"
+    "request": "^2.36.0",
+    "tap": "0.4.9",
+    "uuid": "1.4.1"
   },
-  "keywords": [
-  ],
+  "keywords": [],
   "engines": {
     "node": "0.10.x"
   }
