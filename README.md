@@ -1,6 +1,8 @@
 Firefox Accounts DB Server
 ==========================
 
+[![Build Status](https://travis-ci.org/mozilla/fxa-auth-db-server.svg?branch=master)](https://travis-ci.org/mozilla/fxa-auth-db-server)
+
 This project implements a DB backend using MySql. It is accessible via HTTP which the
 [fxa-auth-server](https://github.com/mozilla/fxa-auth-server/) will use. Currently a work in progress.
 
