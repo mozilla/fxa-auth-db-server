@@ -58,13 +58,16 @@ function startServer(db) {
             }
           },
           function (err) {
+            if (typeof err !== 'object') {
+              err = { message: err || 'none' }
+            }
             var statusCode = err.code || 500
             var msg = {
               op: 'request.summary',
               route: req.route.name,
               method: req.method,
               url: req.url,
-              err: err.message
+              err: err
             }
             if (statusCode >= 500) {
               log.error(msg)
