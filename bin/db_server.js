@@ -45,9 +45,11 @@ function startServer(db) {
             log.info(
               {
                 op: 'request.summary',
+                code: 200,
                 route: req.route.name,
                 method: req.method,
-                url: req.url
+                path: req.url,
+                t: Date.now() - req.time()
               }
             )
             if (Array.isArray(result)) {
@@ -64,10 +66,12 @@ function startServer(db) {
             var statusCode = err.code || 500
             var msg = {
               op: 'request.summary',
+              code: statusCode,
               route: req.route.name,
               method: req.method,
-              url: req.url,
-              err: err
+              path: req.url,
+              err: err,
+              t: Date.now() - req.time()
             }
             if (statusCode >= 500) {
               log.error(msg)
