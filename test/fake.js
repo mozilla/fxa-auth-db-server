@@ -13,7 +13,7 @@ module.exports.newUserDataHex = function() {
   var data = {}
 
   // account
-  data.accountId = hex16(),
+  data.accountId = hex16()
   data.account = {
     email: hex16() + '@example.com',
     emailCode: hex16(),
@@ -27,6 +27,12 @@ module.exports.newUserDataHex = function() {
   }
 
   // sessionToken
+  data.sessionTokenId = hex32()
+  data.sessionToken = {
+    data : hex32(),
+    uid : data.accountId,
+    createdAt: Date.now(),
+  }
 
   // keyFetchToken
 

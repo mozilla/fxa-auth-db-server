@@ -122,6 +122,56 @@ test(
 )
 
 test(
+  'session token handling',
+  function (t) {
+    t.plan(15)
+    var user = fake.newUserDataHex()
+    client.putThen('/account/' + user.accountId, user.account)
+      .then(function() {
+        return client.getThen('/sessionToken/' + user.sessionTokenId)
+      })
+      .then(function(r) {
+        t.fail('A non-existant session token should not have returned anything')
+      }, function(err) {
+        t.pass('No session token exists yet')
+        return client.putThen('/sessionToken/' + user.sessionTokenId, user.sessionToken)
+      })
+      .then(function(r) {
+        respOk(t, r)
+        return client.getThen('/sessionToken/' + user.sessionTokenId)
+      })
+      .then(function(r) {
+        var token = r.obj
+
+        // tokenId is not returned from db.sessionToken()
+        t.deepEqual(token.tokenData, user.sessionToken.data, 'token data matches')
+        t.deepEqual(token.uid, user.accountId, 'token belongs to this account')
+        t.ok(token.createdAt, 'Got a createdAt')
+        t.equal(!!token.emailVerified, user.account.emailVerified)
+        t.equal(token.email, user.account.email)
+        t.deepEqual(token.emailCode, user.account.emailCode)
+        t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+
+        // now delete it
+        return client.delThen('/sessionToken/' + user.sessionTokenId)
+      })
+      .then(function(r) {
+        respOk(t, r)
+        t.pass('Whoo!')
+        // now make sure the token no longer exists
+        return client.getThen('/sessionToken/' + user.sessionTokenId)
+      })
+      .then(function(r) {
+        t.fail('Fetching the non-existant sessionToken should have failed')
+        t.end()
+      }, function(err) {
+        testNotFound(t, err)
+        t.end()
+      })
+  }
+)
+
+test(
   'teardown',
   function (t) {
     testServer.stop()
