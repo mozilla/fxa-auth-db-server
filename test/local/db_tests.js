@@ -158,7 +158,6 @@ DB.connect(config)
               t.equal(err.code, 409)
               t.equal(err.errno, 101)
               t.equal(err.message, 'Record already exists')
-              //t.equal(err.error, 'Conflict') // how do you do expected fail in node-tap
             }
           )
         }
