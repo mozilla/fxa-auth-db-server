@@ -94,7 +94,7 @@ DB.connect(config)
       test(
         'account creation',
         function (t) {
-          t.plan(30)
+          t.plan(31)
           return db.accountExists(ACCOUNT.email)
           .then(function(exists) {
             t.fail('account should not yet exist for this email address')
@@ -158,6 +158,7 @@ DB.connect(config)
               t.equal(err.code, 409)
               t.equal(err.errno, 101)
               t.equal(err.message, 'Record already exists')
+              t.equal(err.error, 'Conflict', 'depends on GH-34 landing', { todo: true })
             }
           )
         }
