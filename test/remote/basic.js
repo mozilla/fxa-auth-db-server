@@ -6,11 +6,13 @@ var restify = require('restify')
 var TestServer = require('../test_server')
 var pkg = require('../../package.json')
 var config = require('../../config.js')
+var clientThen = require('../client-then.js')
 
 var cfg = {
   port: 8000
 }
 var testServer = new TestServer(cfg)
+var client = clientThen({ url : 'http://127.0.0.1:' + cfg.port })
 
 test(
   'startup',
@@ -23,35 +25,28 @@ test(
   }
 )
 
-var client = restify.createJsonClient({
-  url: 'http://127.0.0.1:' + cfg.port
-});
-
 test(
   'top level info',
   function (t) {
-    client.get('/',
-      function (err, req, res, obj) {
-        t.equal(res.statusCode, 200, 'returns a 200')
-        t.equal(obj.version, pkg.version, 'Version reported is the same a package.json')
-        t.equal(obj.patchLevel, config.patchLevel, 'Patch level is the same as the one set in config')
-        t.deepEqual(obj, { version : pkg.version, patchLevel : config.patchLevel }, 'Object contains no other fields')
+    client.getThen('/')
+      .then(function(r) {
+        t.equal(r.res.statusCode, 200, 'returns a 200')
+        t.equal(r.obj.version, pkg.version, 'Version reported is the same a package.json')
+        t.equal(r.obj.patchLevel, config.patchLevel, 'Patch level is the same as the one set in config')
+        t.deepEqual(r.obj, { version : pkg.version, patchLevel : config.patchLevel }, 'Object contains no other fields')
         t.end()
-      }
-    )
+      })
   }
 )
 
 test(
   'heartbeat',
   function (t) {
-    client.get('/__heartbeat__',
-      function (err, req, res, obj) {
-        console.log('obj:', obj)
-        t.deepEqual(obj, {}, 'Heartbeat contains an empty object and nothing unexpected')
+    client.getThen('/__heartbeat__')
+      .then(function (r) {
+        t.deepEqual(r.obj, {}, 'Heartbeat contains an empty object and nothing unexpected')
         t.end()
-      }
-    )
+      })
   }
 )
 
