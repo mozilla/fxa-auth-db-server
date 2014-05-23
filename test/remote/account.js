@@ -124,7 +124,7 @@ test(
 test(
   'session token handling',
   function (t) {
-    t.plan(15)
+    t.plan(14)
     var user = fake.newUserDataHex()
     client.putThen('/account/' + user.accountId, user.account)
       .then(function() {
@@ -157,12 +157,105 @@ test(
       })
       .then(function(r) {
         respOk(t, r)
-        t.pass('Whoo!')
         // now make sure the token no longer exists
         return client.getThen('/sessionToken/' + user.sessionTokenId)
       })
       .then(function(r) {
         t.fail('Fetching the non-existant sessionToken should have failed')
+        t.end()
+      }, function(err) {
+        testNotFound(t, err)
+        t.end()
+      })
+  }
+)
+
+test(
+  'key fetch token handling',
+  function (t) {
+    t.plan(13)
+    var user = fake.newUserDataHex()
+    client.putThen('/account/' + user.accountId, user.account)
+      .then(function() {
+        return client.getThen('/keyFetchToken/' + user.keyFetchTokenId)
+      })
+      .then(function(r) {
+        t.fail('A non-existant session token should not have returned anything')
+      }, function(err) {
+        t.pass('No session token exists yet')
+        return client.putThen('/keyFetchToken/' + user.keyFetchTokenId, user.keyFetchToken)
+      })
+      .then(function(r) {
+        respOk(t, r)
+        return client.getThen('/keyFetchToken/' + user.keyFetchTokenId)
+      })
+      .then(function(r) {
+        var token = r.obj
+
+        // tokenId is not returned from db.keyFetchToken()
+        t.deepEqual(token.uid, user.accountId, 'token belongs to this account')
+        t.deepEqual(token.authKey, user.keyFetchToken.authKey, 'authKey matches')
+        t.deepEqual(token.keyBundle, user.keyFetchToken.keyBundle, 'keyBundle matches')
+        t.ok(token.createdAt, 'Got a createdAt')
+        t.equal(!!token.emailVerified, user.account.emailVerified)
+        t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+
+        // now delete it
+        return client.delThen('/keyFetchToken/' + user.keyFetchTokenId)
+      })
+      .then(function(r) {
+        respOk(t, r)
+        // now make sure the token no longer exists
+        return client.getThen('/keyFetchToken/' + user.keyFetchTokenId)
+      })
+      .then(function(r) {
+        t.fail('Fetching the non-existant keyFetchToken should have failed')
+        t.end()
+      }, function(err) {
+        testNotFound(t, err)
+        t.end()
+      })
+  }
+)
+
+test(
+  'account reset token handling',
+  function (t) {
+    t.plan(11)
+    var user = fake.newUserDataHex()
+    client.putThen('/account/' + user.accountId, user.account)
+      .then(function() {
+        return client.getThen('/accountResetToken/' + user.accountResetTokenId)
+      })
+      .then(function(r) {
+        t.fail('A non-existant session token should not have returned anything')
+      }, function(err) {
+        t.pass('No session token exists yet')
+        return client.putThen('/accountResetToken/' + user.accountResetTokenId, user.accountResetToken)
+      })
+      .then(function(r) {
+        respOk(t, r)
+        return client.getThen('/accountResetToken/' + user.accountResetTokenId)
+      })
+      .then(function(r) {
+        var token = r.obj
+
+        // tokenId is not returned from db.accountResetToken()
+        t.deepEqual(token.uid, user.accountId, 'token belongs to this account')
+        t.deepEqual(token.tokenData, user.accountResetToken.data, 'token data matches')
+        t.ok(token.createdAt, 'Got a createdAt')
+        t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+
+        // now delete it
+        return client.delThen('/accountResetToken/' + user.accountResetTokenId)
+      })
+      .then(function(r) {
+        respOk(t, r)
+        // now make sure the token no longer exists
+        return client.getThen('/accountResetToken/' + user.accountResetTokenId)
+      })
+      .then(function(r) {
+        t.fail('Fetching the non-existant accountResetToken should have failed')
         t.end()
       }, function(err) {
         testNotFound(t, err)

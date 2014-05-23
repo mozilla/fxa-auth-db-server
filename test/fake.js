@@ -35,12 +35,25 @@ module.exports.newUserDataHex = function() {
   }
 
   // keyFetchToken
+  data.keyFetchTokenId = hex32()
+  data.keyFetchToken = {
+    authKey : hex32(),
+    uid : data.accountId,
+    keyBundle : hex96(),
+    createdAt: Date.now(),
+  }
+
+  // accountResetToken
+  data.accountResetTokenId = hex32()
+  data.accountResetToken = {
+    data : hex32(),
+    uid : data.accountId,
+    createdAt: Date.now(),
+  }
 
   // passwordForgotToken
 
   // passwordChangeToken
-
-  // accountResetToken
 
   return data
 }
