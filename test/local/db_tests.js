@@ -9,7 +9,7 @@ var test = require('../ptaptest')
 var uuid = require('uuid')
 var error = require('../../error')
 var config = require('../../config')
-var log = { trace: console.log }
+var log = require('../../log')(config.logLevel, 'db-api')
 var DB = require('../../db/mysql')(log, error)
 
 var zeroBuffer16 = Buffer('00000000000000000000000000000000', 'hex')
@@ -94,7 +94,7 @@ DB.connect(config)
       test(
         'account creation',
         function (t) {
-          t.plan(26)
+          t.plan(30)
           return db.accountExists(ACCOUNT.email)
           .then(function(exists) {
             t.fail('account should not yet exist for this email address')
@@ -145,6 +145,22 @@ DB.connect(config)
             t.equal(account.verifierVersion, ACCOUNT.verifierVersion)
             t.ok(account.verifierSetAt, 'verifierSetAt is set to a truthy value')
           })
+          // and we piggyback some duplicate query error handling here...
+          .then(function() {
+            return db.createAccount(ACCOUNT.uid, ACCOUNT)
+          })
+          .then(
+            function() {
+              t.fail('this should have resulted in a duplicate account error')
+            },
+            function(err) {
+              t.ok(err, 'trying to create the same account produces an error')
+              t.equal(err.code, 409)
+              t.equal(err.errno, 101)
+              t.equal(err.message, 'Record already exists')
+              //t.equal(err.error, 'Conflict') // how do you do expected fail in node-tap
+            }
+          )
         }
       )
 
