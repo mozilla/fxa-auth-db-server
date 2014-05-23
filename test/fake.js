@@ -51,9 +51,23 @@ module.exports.newUserDataHex = function() {
     createdAt: Date.now(),
   }
 
-  // passwordForgotToken
-
   // passwordChangeToken
+  data.passwordChangeTokenId = hex32()
+  data.passwordChangeToken = {
+    data : hex32(),
+    uid : data.accountId,
+    createdAt: Date.now(),
+  }
+
+  // passwordForgotToken
+  data.passwordForgotTokenId = hex32()
+  data.passwordForgotToken = {
+    data : hex32(),
+    uid : data.accountId,
+    passCode : hex16(),
+    tries : 1,
+    createdAt: Date.now(),
+  }
 
   return data
 }

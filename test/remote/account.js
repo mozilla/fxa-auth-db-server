@@ -265,6 +265,101 @@ test(
 )
 
 test(
+  'password change token handling',
+  function (t) {
+    t.plan(11)
+    var user = fake.newUserDataHex()
+    client.putThen('/account/' + user.accountId, user.account)
+      .then(function() {
+        return client.getThen('/passwordChangeToken/' + user.passwordChangeTokenId)
+      })
+      .then(function(r) {
+        t.fail('A non-existant session token should not have returned anything')
+      }, function(err) {
+        t.pass('No session token exists yet')
+        return client.putThen('/passwordChangeToken/' + user.passwordChangeTokenId, user.passwordChangeToken)
+      })
+      .then(function(r) {
+        respOk(t, r)
+        return client.getThen('/passwordChangeToken/' + user.passwordChangeTokenId)
+      })
+      .then(function(r) {
+        var token = r.obj
+
+        // tokenId is not returned from db.passwordChangeToken()
+        t.deepEqual(token.tokenData, user.passwordChangeToken.data, 'token data matches')
+        t.deepEqual(token.uid, user.accountId, 'token belongs to this account')
+        t.ok(token.createdAt, 'Got a createdAt')
+        t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+
+        // now delete it
+        return client.delThen('/passwordChangeToken/' + user.passwordChangeTokenId)
+      })
+      .then(function(r) {
+        respOk(t, r)
+        // now make sure the token no longer exists
+        return client.getThen('/passwordChangeToken/' + user.passwordChangeTokenId)
+      })
+      .then(function(r) {
+        t.fail('Fetching the non-existant passwordChangeToken should have failed')
+        t.end()
+      }, function(err) {
+        testNotFound(t, err)
+        t.end()
+      })
+  }
+)
+
+test(
+  'password forgot token handling',
+  function (t) {
+    t.plan(12)
+    var user = fake.newUserDataHex()
+    client.putThen('/account/' + user.accountId, user.account)
+      .then(function() {
+        return client.getThen('/passwordForgotToken/' + user.passwordForgotTokenId)
+      })
+      .then(function(r) {
+        t.fail('A non-existant session token should not have returned anything')
+      }, function(err) {
+        t.pass('No session token exists yet')
+        return client.putThen('/passwordForgotToken/' + user.passwordForgotTokenId, user.passwordForgotToken)
+      })
+      .then(function(r) {
+        respOk(t, r)
+        return client.getThen('/passwordForgotToken/' + user.passwordForgotTokenId)
+      })
+      .then(function(r) {
+        var token = r.obj
+
+        // tokenId is not returned from db.passwordForgotToken()
+        t.deepEqual(token.tokenData, user.passwordForgotToken.data, 'token data matches')
+        t.deepEqual(token.uid, user.accountId, 'token belongs to this account')
+        t.ok(token.createdAt, 'Got a createdAt')
+        t.deepEqual(token.passCode, user.passwordForgotToken.passCode)
+        t.equal(token.tries, user.passwordForgotToken.tries, 'Tries is correct')
+        t.equal(token.email, user.account.email)
+        t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+
+        // now delete it
+        return client.delThen('/passwordForgotToken/' + user.passwordForgotTokenId)
+      })
+      .then(function(r) {
+        respOk(t, r)
+        // now make sure the token no longer exists
+        return client.getThen('/passwordForgotToken/' + user.passwordForgotTokenId)
+      })
+      .then(function(r) {
+        t.fail('Fetching the non-existant passwordForgotToken should have failed')
+        t.end()
+      }, function(err) {
+        testNotFound(t, err)
+        t.end()
+      })
+  }
+)
+
+test(
   'teardown',
   function (t) {
     testServer.stop()
