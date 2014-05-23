@@ -30,7 +30,10 @@ memoryMonitor.start()
 process.on(
   'uncaughtException',
   function (err) {
-    log.fatal(err)
+    log.fatal({
+      op: 'uncaughtException',
+      err: err
+    })
     process.exit(8)
   }
 )
