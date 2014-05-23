@@ -7,6 +7,7 @@ var inherits = require('util').inherits
 function AppError(options) {
   this.message = options.message
   this.errno = options.errno
+  this.error = options.error
   this.code = options.code
 }
 inherits(AppError, Error)
