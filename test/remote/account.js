@@ -317,7 +317,7 @@ test(
 test(
   'password forgot token handling',
   function (t) {
-    t.plan(12)
+    t.plan(19)
     var user = fake.newUserDataHex()
     client.putThen('/account/' + user.accountId, user.account)
       .then(function() {
@@ -345,6 +345,28 @@ test(
         t.equal(token.email, user.account.email)
         t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
 
+        // now update this token (with extra tries)
+        user.passwordForgotToken.tries += 1
+        return client.postThen('/passwordForgotToken/' + user.passwordForgotTokenId + '/update', user.passwordForgotToken)
+      })
+      .then(function(r) {
+        respOk(t, r)
+
+        // re-fetch this token
+        return client.getThen('/passwordForgotToken/' + user.passwordForgotTokenId)
+      })
+      .then(function(r) {
+        var token = r.obj
+
+        // tokenId is not returned from db.passwordForgotToken()
+        t.deepEqual(token.tokenData, user.passwordForgotToken.data, 'token data matches')
+        t.deepEqual(token.uid, user.accountId, 'token belongs to this account')
+        t.ok(token.createdAt, 'Got a createdAt')
+        t.deepEqual(token.passCode, user.passwordForgotToken.passCode)
+        t.equal(token.tries, user.passwordForgotToken.tries, 'Tries is correct (now incremented)')
+        t.equal(token.email, user.account.email)
+        t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+
         // now delete it
         return client.delThen('/passwordForgotToken/' + user.passwordForgotTokenId)
       })
@@ -358,6 +380,61 @@ test(
         t.end()
       }, function(err) {
         testNotFound(t, err)
+        t.end()
+      })
+  }
+)
+
+test(
+  'password forgot token verified',
+  function (t) {
+    t.plan(16)
+    var user = fake.newUserDataHex()
+    client.putThen('/account/' + user.accountId, user.account)
+      .then(function(r) {
+        respOk(t, r)
+        return client.putThen('/passwordForgotToken/' + user.passwordForgotTokenId, user.passwordForgotToken)
+      })
+      .then(function(r) {
+        respOk(t, r)
+        // now, verify the password (which inserts the accountResetToken)
+        user.accountResetToken.tokenId = user.accountResetTokenId
+        return client.postThen('/passwordForgotToken/' + user.passwordForgotTokenId + '/verified', user.accountResetToken)
+      })
+      .then(function(r) {
+        respOk(t, r)
+        // check the accountResetToken exists
+        return client.getThen('/accountResetToken/' + user.accountResetTokenId)
+      })
+      .then(function(r) {
+        var token = r.obj
+
+        // tokenId is not returned from db.accountResetToken()
+        t.deepEqual(token.uid, user.accountId, 'token belongs to this account')
+        t.deepEqual(token.tokenData, user.accountResetToken.data, 'token data matches')
+        t.ok(token.createdAt, 'Got a createdAt')
+        t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+
+        // make sure then passwordForgotToken no longer exists
+        return client.getThen('/passwordForgotToken/' + user.passwordForgotTokenId)
+      })
+      .then(function(r) {
+        t.fail('Fetching the non-existant passwordForgotToken should have failed')
+      }, function(err) {
+        testNotFound(t, err)
+        // and check that the account has been verified
+        return client.getThen('/emailRecord/' + emailToHex(user.account.email))
+      })
+      .then(function(r) {
+        respOk(t, r)
+        var account = r.obj
+        t.equal(true, !!account.emailVerified, 'emailVerified is now true')
+      })
+      .then(function(r) {
+        t.pass('All password forgot token verified tests passed')
+        t.end()
+      }, function(err) {
+        t.fail(err)
         t.end()
       })
   }
