@@ -7,9 +7,12 @@ var test = require('tap').test
 
 var fake = require('../fake.js')
 var TestServer = require('../test_server')
-var pkg = require('../../package.json')
 var config = require('../../config.js')
 var clientThen = require('../client-then.js')
+
+function emailToHex(email) {
+  return Buffer(email).toString('hex')
+}
 
 var cfg = {
   port: 8000
@@ -20,6 +23,7 @@ var client = clientThen({ url : 'http://127.0.0.1:' + cfg.port })
 test(
   'startup',
   function (t) {
+    t.plan(2)
     testServer.start(function (err) {
       t.type(testServer.server, 'object', 'test server was started')
       t.equal(err, null, 'no errors were returned')
@@ -82,11 +86,11 @@ test(
         t.fail('Error for some reason:' + err)
       })
       .then(function() {
-        return client.headThen('/emailRecord/' + Buffer(user.account.email).toString('hex'))
+        return client.headThen('/emailRecord/' + emailToHex(user.account.email))
       })
       .then(function(r) {
         respOkEmpty(t, r)
-        return client.getThen('/emailRecord/' + Buffer(user.account.email).toString('hex'))
+        return client.getThen('/emailRecord/' + emailToHex(user.account.email))
       })
       .then(function(r) {
         respOk(t, r)
@@ -103,7 +107,7 @@ test(
       .then(function(r) {
         respOk(t, r)
         // now make sure this record no longer exists
-        return client.headThen('/emailRecord/' + Buffer(user.account.email).toString('hex'))
+        return client.headThen('/emailRecord/' + emailToHex(user.account.email))
       })
       .then(function(r) {
         t.fail('Should not be here, since this account no longer exists')
@@ -362,6 +366,7 @@ test(
 test(
   'teardown',
   function (t) {
+    t.plan(1)
     testServer.stop()
     t.equal(testServer.server.killed, true, 'test server has been killed')
     t.end()

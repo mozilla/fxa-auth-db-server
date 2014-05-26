@@ -4,63 +4,24 @@
 var restify = require('restify')
 var P = require('../promise.js')
 
+var ops = [ 'head', 'get', 'post', 'put', 'del' ]
+
 module.exports = function createClient(cfg) {
   var client = restify.createJsonClient(cfg)
 
-  client.headThen = function() {
-    var p = P.defer()
-    var args = Array.prototype.slice.call(arguments, 0)
-    args.push(function(err, req, res, obj) {
-      if (err) return p.reject(err)
-      p.resolve({ req: req, res: res, obj: obj })
-    })
-    client.head.apply(this, args)
-    return p.promise
-  }
-
-  client.getThen = function() {
-    var p = P.defer()
-    var args = Array.prototype.slice.call(arguments, 0)
-    args.push(function(err, req, res, obj) {
-      if (err) return p.reject(err)
-      p.resolve({ req: req, res: res, obj: obj })
-    })
-    client.get.apply(this, args)
-    return p.promise
-  }
-
-  client.postThen = function() {
-    var p = P.defer()
-    var args = Array.prototype.slice.call(arguments, 0)
-    args.push(function(err, req, res, obj) {
-      if (err) return p.reject(err)
-      p.resolve({ req: req, res: res, obj: obj })
-    })
-    client.post.apply(this, args)
-    return p.promise
-  }
-
-  client.putThen = function() {
-    var p = P.defer()
-    var args = Array.prototype.slice.call(arguments, 0)
-    args.push(function(err, req, res, obj) {
-      if (err) return p.reject(err)
-      p.resolve({ req: req, res: res, obj: obj })
-    })
-    client.put.apply(this, args)
-    return p.promise
-  }
-
-  client.delThen = function() {
-    var p = P.defer()
-    var args = Array.prototype.slice.call(arguments, 0)
-    args.push(function(err, req, res, obj) {
-      if (err) return p.reject(err)
-      p.resolve({ req: req, res: res, obj: obj })
-    })
-    client.del.apply(this, args)
-    return p.promise
-  }
+  // create a thenable version of each operation
+  ops.forEach(function(name) {
+    client[name + 'Then'] = function() {
+      var p = P.defer()
+      var args = Array.prototype.slice.call(arguments, 0)
+      args.push(function(err, req, res, obj) {
+        if (err) return p.reject(err)
+        p.resolve({ req: req, res: res, obj: obj })
+      })
+      client[name].apply(this, args)
+      return p.promise
+    }
+  })
 
   return client
 }
