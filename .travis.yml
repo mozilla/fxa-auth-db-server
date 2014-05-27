@@ -18,6 +18,9 @@ notifications:
     use_notice: false
     skip_join: false
 
+install:
+  - npm install --no-optional
+
 before_script:
   - mysql -e 'DROP DATABASE IF EXISTS fxa'
 
