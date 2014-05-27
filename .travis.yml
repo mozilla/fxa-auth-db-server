@@ -18,9 +18,6 @@ notifications:
     use_notice: false
     skip_join: false
 
-# this is an unfortunate dependency to show a fricking svg button
-before_install: sudo apt-get install libcairo2-dev libjpeg8-dev libpango1.0-dev libgif-dev build-essential g++
-
 before_script:
   - mysql -e 'DROP DATABASE IF EXISTS fxa'
 

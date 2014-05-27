@@ -9,7 +9,7 @@ var test = require('../ptaptest')
 var uuid = require('uuid')
 var error = require('../../error')
 var config = require('../../config')
-var log = require('../../log')(config.logLevel, 'db-api')
+var log = { trace: console.log, error: console.log }
 var DB = require('../../db/mysql')(log, error)
 
 var zeroBuffer16 = Buffer('00000000000000000000000000000000', 'hex')

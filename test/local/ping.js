@@ -6,7 +6,7 @@ require('ass')
 var test = require('../ptaptest')
 var error = require('../../error')
 var config = require('../../config')
-var log = require('../../log')(config.logLevel, 'test-run')
+var log = { trace: console.log, error: console.log }
 var DB = require('../../db/mysql')(log, error)
 
 DB.connect(config)
