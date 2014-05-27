@@ -7,7 +7,7 @@ var P = require('../../promise')
 var test = require('tap').test
 var error = require('../../error')
 var config = require('../../config')
-var log = require('../../log')(config.logLevel, 'db-api')
+var log = { trace: console.log, error: console.log }
 var DB = require('../../db/mysql')(log, error)
 
 config.patchLevel = 1000000
