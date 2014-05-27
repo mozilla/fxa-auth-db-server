@@ -7,7 +7,9 @@ var inherits = require('util').inherits
 function AppError(options) {
   this.message = options.message
   this.errno = options.errno
+  this.error = options.error
   this.code = options.code
+  if (options.stack) this.stack = options.stack
 }
 inherits(AppError, Error)
 
@@ -43,7 +45,8 @@ AppError.wrap = function (err) {
       code: 500,
       error: 'Internal Server Error',
       errno: err.errno,
-      message: err.code
+      message: err.code,
+      stack: err.stack
     }
   )
 }
