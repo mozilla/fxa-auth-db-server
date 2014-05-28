@@ -2,10 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-var crypto = require('crypto')
-
 require('ass')
+var P = require('../../promise')
 var test = require('../ptaptest')
+var crypto = require('crypto')
 var uuid = require('uuid')
 var error = require('../../error')
 var config = require('../../config')
@@ -158,7 +158,7 @@ DB.connect(config)
               t.equal(err.code, 409)
               t.equal(err.errno, 101)
               t.equal(err.message, 'Record already exists')
-              t.equal(err.error, 'Conflict', 'depends on GH-34 landing', { todo: true })
+              t.equal(err.error, 'Conflict')
             }
           )
         }
@@ -517,6 +517,93 @@ DB.connect(config)
             }, function(err) {
               t.pass('account no longer exists for this email address')
             })
+        }
+      )
+
+      test(
+        'a select on an unknown table should result in an error',
+        function (t) {
+          var query = 'SELECT mumble as id FROM mumble.mumble WHERE mumble = ?'
+          var param = 'mumble'
+          db.read(query, param)
+            .then(
+              function(result) {
+                t.plan(1)
+                t.fail('Should not have arrived here for an invalid select')
+              },
+              function(err) {
+                t.plan(5)
+                t.ok(err, 'we have an error')
+                t.equal(err.code, 500)
+                t.equal(err.errno, 1146)
+                t.equal(err.error, 'Internal Server Error')
+                t.equal(err.message, 'ER_NO_SUCH_TABLE')
+              }
+            )
+        }
+      )
+
+      test(
+        'an update to an unknown table should result in an error',
+        function (t) {
+          var query = 'UPDATE mumble.mumble SET mumble = ?'
+          var param = 'mumble'
+
+          db.write(query, param)
+            .then(
+              function(result) {
+                t.plan(1)
+                t.fail('Should not have arrived here for an invalid update')
+              },
+              function(err) {
+                t.plan(5)
+                t.ok(err, 'we have an error')
+                t.equal(err.code, 500)
+                t.equal(err.errno, 1146)
+                t.equal(err.error, 'Internal Server Error')
+                t.equal(err.message, 'ER_NO_SUCH_TABLE')
+              }
+            )
+        }
+      )
+
+      test(
+        'an transaction to update an unknown table should result in an error',
+        function (t) {
+          var sql = 'UPDATE mumble.mumble SET mumble = ?'
+          var param = 'mumble'
+
+          function query(connection, sql, params) {
+            var d = P.defer()
+            connection.query(
+              sql,
+              params || [],
+              function (err, results) {
+                if (err) { return d.reject(err) }
+                d.resolve(results)
+              }
+            )
+            return d.promise
+          }
+
+          db.transaction(
+            function (connection) {
+              return query(connection, sql, param)
+            })
+            .then(
+              function(result) {
+                t.plan(1)
+                t.fail('Should not have arrived here for an invalid update')
+              },
+              function(err) {
+                t.plan(5)
+                t.ok(err, 'we have an error')
+                t.equal(err.code, 500)
+                t.equal(err.errno, 1146)
+                t.equal(err.error, 'Internal Server Error')
+                t.equal(err.message, 'ER_NO_SUCH_TABLE')
+              }
+            )
         }
       )
 
