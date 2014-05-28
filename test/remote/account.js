@@ -5,10 +5,10 @@ var uuid = require('uuid')
 var restify = require('restify')
 var test = require('tap').test
 
-var fake = require('../fake.js')
+var fake = require('../fake')
 var TestServer = require('../test_server')
-var config = require('../../config.js')
-var clientThen = require('../client-then.js')
+var config = require('../../config')
+var clientThen = require('../client-then')
 
 function emailToHex(email) {
   return Buffer(email).toString('hex')

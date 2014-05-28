@@ -34,7 +34,7 @@ TestServer.prototype.start = function (cb) {
   if (!this.server) {
     this.server = cp.spawn(
       'node',
-      ['./db_server_stub.js'],
+      ['./db_server_stub'],
       {
         cwd: __dirname,
         stdio: 'ignore'

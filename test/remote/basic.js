@@ -5,8 +5,8 @@ var test = require('tap').test
 var restify = require('restify')
 var TestServer = require('../test_server')
 var pkg = require('../../package.json')
-var config = require('../../config.js')
-var clientThen = require('../client-then.js')
+var config = require('../../config')
+var clientThen = require('../client-then')
 
 var cfg = {
   port: 8000
