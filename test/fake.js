@@ -4,10 +4,21 @@
 var crypto = require('crypto')
 var uuid = require('uuid')
 
-function hex16() { return crypto.randomBytes(16).toString('hex') }
-function hex32() { return crypto.randomBytes(32).toString('hex') }
-function hex64() { return crypto.randomBytes(64).toString('hex') }
-function hex96() { return crypto.randomBytes(96).toString('hex') }
+function hex(len) {
+  return crypto.randomBytes(len).toString('hex')
+}
+function hex16() { return hex(16) }
+function hex32() { return hex(32) }
+function hex64() { return hex(64) }
+function hex96() { return hex(96) }
+
+function buf(len) {
+  return Buffer(crypto.randomBytes(len))
+}
+function buf16() { return buf(16) }
+function buf32() { return buf(32) }
+function buf64() { return buf(64) }
+function buf96() { return buf(96) }
 
 module.exports.newUserDataHex = function() {
   var data = {}
@@ -65,6 +76,69 @@ module.exports.newUserDataHex = function() {
     data : hex32(),
     uid : data.accountId,
     passCode : hex16(),
+    tries : 1,
+    createdAt: Date.now(),
+  }
+
+  return data
+}
+
+module.exports.newUserDataBuffer = function() {
+  var data = {}
+
+  // account
+  data.accountId = buf16()
+  data.account = {
+    email: buf16() + '@example.com',
+    emailCode: buf16(),
+    emailVerified: false,
+    verifierVersion: 1,
+    verifyHash: buf32(),
+    authSalt: buf32(),
+    kA: buf32(),
+    wrapWrapKb: buf32(),
+    verifierSetAt: Date.now(),
+  }
+
+  // sessionToken
+  data.sessionTokenId = buf32()
+  data.sessionToken = {
+    data : buf32(),
+    uid : data.accountId,
+    createdAt: Date.now(),
+  }
+
+  // keyFetchToken
+  data.keyFetchTokenId = buf32()
+  data.keyFetchToken = {
+    authKey : buf32(),
+    uid : data.accountId,
+    keyBundle : buf96(),
+    createdAt: Date.now(),
+  }
+
+  // accountResetToken
+  data.accountResetTokenId = buf32()
+  data.accountResetToken = {
+    data : buf32(),
+    uid : data.accountId,
+    createdAt: Date.now(),
+  }
+
+  // passwordChangeToken
+  data.passwordChangeTokenId = buf32()
+  data.passwordChangeToken = {
+    data : buf32(),
+    uid : data.accountId,
+    createdAt: Date.now(),
+  }
+
+  // passwordForgotToken
+  data.passwordForgotTokenId = buf32()
+  data.passwordForgotToken = {
+    data : buf32(),
+    uid : data.accountId,
+    passCode : buf16(),
     tries : 1,
     createdAt: Date.now(),
   }
