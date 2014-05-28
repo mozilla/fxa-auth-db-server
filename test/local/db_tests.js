@@ -95,7 +95,8 @@ DB.connect(config)
         'account creation',
         function (t) {
           t.plan(31)
-          return db.accountExists(ACCOUNT.email)
+          var hexEmail = Buffer(ACCOUNT.email).toString('hex')
+          return db.accountExists(hexEmail)
           .then(function(exists) {
             t.fail('account should not yet exist for this email address')
           }, function(err) {
@@ -106,7 +107,8 @@ DB.connect(config)
           })
           .then(function(account) {
             t.deepEqual(account, {}, 'Returned an empty object on account creation')
-            return db.accountExists(ACCOUNT.email)
+            var hexEmail = Buffer(ACCOUNT.email).toString('hex')
+            return db.accountExists(hexEmail)
           })
           .then(function(exists) {
             t.ok(exists, 'account exists for this email address')
@@ -493,7 +495,8 @@ DB.connect(config)
             })
             .then(function() {
               // account should STILL exist for this email address
-              return db.accountExists(ACCOUNT.email)
+              var hexEmail = Buffer(ACCOUNT.email).toString('hex')
+              return db.accountExists(hexEmail)
             })
             .then(function(exists) {
               t.ok(exists, 'account still exists ok')
@@ -510,7 +513,8 @@ DB.connect(config)
           // account should no longer exist for this email address
           return db.deleteAccount(ACCOUNT.uid)
             .then(function() {
-              return db.accountExists(ACCOUNT.email)
+              var hexEmail = Buffer(ACCOUNT.email).toString('hex')
+              return db.accountExists(hexEmail)
             })
             .then(function(exists) {
               t.fail('account should no longer exist for this email address')

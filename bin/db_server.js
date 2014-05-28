@@ -38,6 +38,16 @@ process.on(
   }
 )
 
+// defer to allow ass code coverage results to complete processing
+if (process.env.ASS_CODE_COVERAGE) {
+  process.on('SIGINT', shutdown)
+  function shutdown() {
+    process.nextTick(function() {
+      process.exit()
+    })
+  }
+}
+
 function startServer(db) {
 
   function reply(fn) {

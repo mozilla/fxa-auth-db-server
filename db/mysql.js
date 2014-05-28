@@ -229,7 +229,7 @@ module.exports = function (log, error) {
   var ACCOUNT_EXISTS = 'SELECT uid FROM accounts WHERE normalizedEmail = LOWER(?)'
 
   MySql.prototype.accountExists = function (email) {
-    return this.readOne(ACCOUNT_EXISTS, email)
+    return this.readOne(ACCOUNT_EXISTS, Buffer(email, 'hex').toString('utf8'))
   }
 
   var ACCOUNT_DEVICES = 'SELECT tokenId as id FROM sessionTokens WHERE uid = ?'
