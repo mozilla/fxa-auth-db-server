@@ -570,8 +570,9 @@ module.exports = function (log, error) {
       return result
     }
     function failure(err) {
+      var errno = err.cause ? err.cause.errno : err.errno
       log.error({ op: 'MySql.retryable', err: err })
-      if (errnos.indexOf(err.errno) === -1) {
+      if (errnos.indexOf(errno) === -1) {
         throw err
       }
       return fn()
