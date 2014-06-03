@@ -580,5 +580,8 @@ module.exports = function (log, error) {
     return fn().then(success, failure)
   }
 
+  // exposed for testing only
+  MySql.prototype.retryable_ = retryable
+
   return MySql
 }

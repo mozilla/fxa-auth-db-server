@@ -612,6 +612,46 @@ DB.connect(config)
       )
 
       test(
+        'retryable does retry when the errno is matched',
+        function (t) {
+          var query = 'UPDATE mumble.mumble SET mumble = ?'
+          var param = 'mumble'
+
+          var callCount = 0
+
+          var writer = function() {
+            ++callCount
+            return db.write(query, param)
+              .then(
+                function(result) {
+                  t.fail('this query should never succeed!')
+                },
+                function(err) {
+                  t.ok(true, 'we got an error')
+                  t.equal(err.code, 500)
+                  t.equal(err.errno, 1146)
+                  t.equal(err.error, 'Internal Server Error')
+                  t.equal(err.message, 'ER_NO_SUCH_TABLE')
+                  return P.reject(err)
+                }
+              )
+          }
+
+          db.retryable_(writer, [ 1146 ])
+            .then(
+              function(result) {
+                t.fail('This should never happen, even with a retry ' + callCount)
+                t.end()
+              },
+              function(err) {
+                t.equal(callCount, 2, 'the function was retried')
+                t.end()
+              }
+            )
+        }
+      )
+
+      test(
         'teardown',
         function (t) {
           return db.close()
