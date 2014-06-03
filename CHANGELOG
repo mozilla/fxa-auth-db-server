@@ -1,0 +1,7 @@
+train-14
+  * fix #33 - retryable is matching errno on the wrong object in some cases
+  * more tests
+  * fix coverage stats
+
+train-13
+  * initial version
