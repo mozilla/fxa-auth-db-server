@@ -632,7 +632,7 @@ DB.connect(config)
                   t.equal(err.errno, 1146)
                   t.equal(err.error, 'Internal Server Error')
                   t.equal(err.message, 'ER_NO_SUCH_TABLE')
-                  return P.reject(err)
+                  throw err
                 }
               )
           }
