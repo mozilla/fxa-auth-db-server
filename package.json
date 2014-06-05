@@ -25,7 +25,6 @@
     "restify": "2.7.0"
   },
   "devDependencies": {
-    "uuid": "1.4.1",
     "ass": "git://github.com/dannycoates/ass.git#7d131b5769",
     "grunt": "0.4.5",
     "grunt-contrib-jshint": "0.10.0",
