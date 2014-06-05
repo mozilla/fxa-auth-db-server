@@ -230,9 +230,8 @@ function close() {
         return d.reject(err)
       }
 
-      // create the mysql class
-      log.trace( { op: 'MySql.createSchema:ResolvingWithNewClient' } )
-      d.resolve('ok')
+      log.trace( { op: 'MySql.createSchema:Closed' } )
+      d.resolve()
     }
   )
   return d.promise
