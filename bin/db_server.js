@@ -91,7 +91,7 @@ function startServer(db) {
             else {
               log.warn(msg)
             }
-            res.send(err.code || 500, err)
+            res.send(statusCode, err)
           }
         )
         .done(next, next)
