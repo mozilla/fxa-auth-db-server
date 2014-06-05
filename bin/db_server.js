@@ -8,7 +8,7 @@ var bufferize = require('../bufferize')
 var config = require('../config')
 var log = require('../log')(config.logLevel, 'db-api')
 var DB = require('../db/mysql')(log, error)
-var package = require('../package.json')
+var pkg = require('../package.json')
 
 var MemoryMonitor = require('../memory_monitor')
 var memoryMonitor = new MemoryMonitor()
@@ -138,7 +138,7 @@ function startServer(db) {
   api.get(
     '/',
     function (req, res, next) {
-      res.send({ version: package.version, patchLevel: db.patchLevel })
+      res.send({ version: pkg.version, patchLevel: db.patchLevel })
       next()
     }
   )
