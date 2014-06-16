@@ -1,3 +1,6 @@
+train-15
+  * code cleanup and test addition
+
 train-14
   * fix #33 - retryable is matching errno on the wrong object in some cases
   * more tests
