@@ -118,15 +118,15 @@ DB.connect(config)
             return db.account(ACCOUNT.uid)
           })
           .then(function(account) {
-            t.deepEqual(account.uid, ACCOUNT.uid)
-            t.equal(account.email, ACCOUNT.email)
-            t.deepEqual(account.emailCode, ACCOUNT.emailCode)
-            t.equal(!!account.emailVerified, ACCOUNT.emailVerified)
-            t.deepEqual(account.kA, ACCOUNT.kA)
-            t.deepEqual(account.wrapWrapKb, ACCOUNT.wrapWrapKb)
-            t.deepEqual(account.verifyHash, ACCOUNT.verifyHash)
-            t.deepEqual(account.authSalt, ACCOUNT.authSalt)
-            t.equal(account.verifierVersion, ACCOUNT.verifierVersion)
+            t.deepEqual(account.uid, ACCOUNT.uid, 'uid')
+            t.equal(account.email, ACCOUNT.email, 'email')
+            t.deepEqual(account.emailCode, ACCOUNT.emailCode, 'emailCode')
+            t.equal(!!account.emailVerified, ACCOUNT.emailVerified, 'emailVerified')
+            t.deepEqual(account.kA, ACCOUNT.kA, 'kA')
+            t.deepEqual(account.wrapWrapKb, ACCOUNT.wrapWrapKb, 'wrapWrapKb')
+            t.deepEqual(account.verifyHash, ACCOUNT.verifyHash, 'verifyHash')
+            t.deepEqual(account.authSalt, ACCOUNT.authSalt, 'authSalt')
+            t.equal(account.verifierVersion, ACCOUNT.verifierVersion, 'verifierVersion')
             t.equal(account.verifierSetAt, account.createdAt, 'verifierSetAt has been set to the same as createdAt')
             t.ok(account.createdAt)
           })
@@ -136,15 +136,15 @@ DB.connect(config)
             return db.emailRecord(hexEmail)
           })
           .then(function(account) {
-            t.deepEqual(account.uid, ACCOUNT.uid)
-            t.equal(account.email, ACCOUNT.email)
-            t.deepEqual(account.emailCode, ACCOUNT.emailCode)
-            t.equal(!!account.emailVerified, ACCOUNT.emailVerified)
-            t.deepEqual(account.kA, ACCOUNT.kA)
-            t.deepEqual(account.wrapWrapKb, ACCOUNT.wrapWrapKb)
-            t.deepEqual(account.verifyHash, ACCOUNT.verifyHash)
-            t.deepEqual(account.authSalt, ACCOUNT.authSalt)
-            t.equal(account.verifierVersion, ACCOUNT.verifierVersion)
+            t.deepEqual(account.uid, ACCOUNT.uid, 'uid')
+            t.equal(account.email, ACCOUNT.email, 'email')
+            t.deepEqual(account.emailCode, ACCOUNT.emailCode, 'emailCode')
+            t.equal(!!account.emailVerified, ACCOUNT.emailVerified, 'emailVerified')
+            t.deepEqual(account.kA, ACCOUNT.kA, 'kA')
+            t.deepEqual(account.wrapWrapKb, ACCOUNT.wrapWrapKb, 'wrapWrapKb')
+            t.deepEqual(account.verifyHash, ACCOUNT.verifyHash, 'verifyHash')
+            t.deepEqual(account.authSalt, ACCOUNT.authSalt, 'authSalt')
+            t.equal(account.verifierVersion, ACCOUNT.verifierVersion, 'verifierVersion')
             t.ok(account.verifierSetAt, 'verifierSetAt is set to a truthy value')
           })
           // and we piggyback some duplicate query error handling here...
@@ -157,10 +157,10 @@ DB.connect(config)
             },
             function(err) {
               t.ok(err, 'trying to create the same account produces an error')
-              t.equal(err.code, 409)
-              t.equal(err.errno, 101)
-              t.equal(err.message, 'Record already exists')
-              t.equal(err.error, 'Conflict')
+              t.equal(err.code, 409, 'code')
+              t.equal(err.errno, 101, 'errno')
+              t.equal(err.message, 'Record already exists', 'message')
+              t.equal(err.error, 'Conflict', 'error')
             }
           )
         }
@@ -307,12 +307,22 @@ DB.connect(config)
           .then(function(emailRecord) {
             return db.verifyEmail(emailRecord.uid)
           })
-          .then(function() {
+          .then(function(result) {
+            t.deepEqual(result, {}, 'Returned an empty object email verification')
             return db.account(ACCOUNT.uid)
           })
           .then(function(account) {
             t.ok(account.emailVerified, 'account should now be emailVerified (truthy)')
             t.equal(account.emailVerified, 1, 'account should now be emailVerified (1)')
+          })
+          .then(function() {
+            // test verifyEmail for a non-existant account
+            return db.verifyEmail(uuid.v4('binary'))
+          })
+          .then(function(res) {
+            t.deepEqual(res, {}, 'No matter what happens, we get an empty object back')
+          }, function(err) {
+            t.fail('We should not have failed this .verifyEmail() request')
           })
         }
       )
@@ -351,7 +361,7 @@ DB.connect(config)
       test(
         'db.forgotPasswordVerified',
         function (t) {
-          t.plan(7)
+          t.plan(12)
           // for this test, we are creating a new account with a different email address
           // so that we can check that emailVerified turns from false to true (since
           // we already set it to true earlier)
@@ -389,12 +399,15 @@ DB.connect(config)
               return db.emailRecord(hexEmail)
             })
             .then(function(result) {
+              t.pass('.emailRecord() did not error')
               return db.createPasswordForgotToken(PASSWORD_FORGOT_TOKEN_ID, PASSWORD_FORGOT_TOKEN)
             })
             .then(function(passwordForgotToken) {
+              t.pass('.createPasswordForgotToken() did not error')
               return db.forgotPasswordVerified(PASSWORD_FORGOT_TOKEN_ID, ACCOUNT_RESET_TOKEN)
             })
             .then(function() {
+              t.pass('.forgotPasswordVerified() did not error')
               return db.passwordForgotToken(PASSWORD_FORGOT_TOKEN_ID)
             })
             .then(function(token) {
@@ -406,6 +419,7 @@ DB.connect(config)
               return db.accountResetToken(ACCOUNT_RESET_TOKEN_ID)
             })
             .then(function(accountResetToken) {
+              t.pass('.accountResetToken() did not error')
               // tokenId is not returned
               t.deepEqual(accountResetToken.uid, ACCOUNT.uid, 'token belongs to this account')
               t.deepEqual(accountResetToken.tokenData, ACCOUNT_RESET_TOKEN.data, 'token data matches')
@@ -479,18 +493,22 @@ DB.connect(config)
       test(
         'db.resetAccount',
         function (t) {
-          t.plan(2)
+          t.plan(6)
           return db.createSessionToken(SESSION_TOKEN_ID, SESSION_TOKEN)
             .then(function(sessionToken) {
+              t.pass('.createSessionToken() did not error')
               return db.createAccountResetToken(ACCOUNT_RESET_TOKEN_ID, ACCOUNT_RESET_TOKEN)
             })
             .then(function() {
+              t.pass('.createAccountResetToken() did not error')
               return db.resetAccount(ACCOUNT.uid, ACCOUNT)
             })
             .then(function(sessionToken) {
+              t.pass('.resetAccount() did not error')
               return db.accountDevices(ACCOUNT.uid)
             })
             .then(function(devices) {
+              t.pass('.accountDevices() did not error')
               t.equal(devices.length, 0, 'The devices length should be zero')
             })
             .then(function() {
