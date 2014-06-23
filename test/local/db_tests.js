@@ -320,9 +320,12 @@ DB.connect(config)
             return db.verifyEmail(uuid.v4('binary'))
           })
           .then(function(res) {
-            t.deepEqual(res, {}, 'No matter what happens, we get an empty object back')
+            t.fail('We should have failed this since this account is non-existant')
           }, function(err) {
-            t.fail('We should not have failed this .verifyEmail() request')
+            t.equal(err.code, 404, 'code')
+            t.equal(err.errno, 116, 'errno')
+            t.equal(err.message, 'Not Found', 'message')
+            t.equal(err.error, 'Not Found', 'error')
           })
         }
       )

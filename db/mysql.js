@@ -139,6 +139,7 @@ module.exports = function (log, error) {
         data.createdAt
       ]
     )
+      .then(function() { return {} })
   }
 
   var CREATE_SESSION_TOKEN = 'INSERT INTO sessionTokens' +
@@ -155,6 +156,7 @@ module.exports = function (log, error) {
         sessionToken.createdAt
       ]
     )
+      .then(function() { return {} })
   }
 
   var CREATE_KEY_FETCH_TOKEN = 'INSERT INTO keyFetchTokens' +
@@ -172,6 +174,7 @@ module.exports = function (log, error) {
         keyFetchToken.createdAt
       ]
     )
+      .then(function() { return {} })
   }
 
   var CREATE_ACCOUNT_RESET_TOKEN = 'REPLACE INTO accountResetTokens' +
@@ -188,6 +191,7 @@ module.exports = function (log, error) {
         accountResetToken.createdAt
       ]
     )
+      .then(function() { return {} })
   }
 
   var CREATE_PASSWORD_FORGOT_TOKEN = 'REPLACE INTO passwordForgotTokens' +
@@ -206,6 +210,7 @@ module.exports = function (log, error) {
         passwordForgotToken.tries
       ]
     )
+      .then(function() { return {} })
   }
 
   var CREATE_PASSWORD_CHANGE_TOKEN = 'REPLACE INTO passwordChangeTokens' +
@@ -222,6 +227,7 @@ module.exports = function (log, error) {
         passwordChangeToken.createdAt
       ]
     )
+      .then(function() { return {} })
   }
 
   // READ
@@ -306,6 +312,7 @@ module.exports = function (log, error) {
 
   MySql.prototype.updatePasswordForgotToken = function (tokenId, token) {
     return this.write(UPDATE_PASSWORD_FORGOT_TOKEN, [token.tries, tokenId])
+      .then(function() { return {} })
   }
 
   // DELETE
@@ -331,30 +338,35 @@ module.exports = function (log, error) {
 
   MySql.prototype.deleteSessionToken = function (tokenId) {
     return this.write(DELETE_SESSION_TOKEN, [tokenId])
+      .then(function() { return {} })
   }
 
   var DELETE_KEY_FETCH_TOKEN = 'DELETE FROM keyFetchTokens WHERE tokenId = ?'
 
   MySql.prototype.deleteKeyFetchToken = function (tokenId) {
     return this.write(DELETE_KEY_FETCH_TOKEN, [tokenId])
+      .then(function() { return {} })
   }
 
   var DELETE_ACCOUNT_RESET_TOKEN = 'DELETE FROM accountResetTokens WHERE tokenId = ?'
 
   MySql.prototype.deleteAccountResetToken = function (tokenId) {
     return this.write(DELETE_ACCOUNT_RESET_TOKEN, [tokenId])
+      .then(function() { return {} })
   }
 
   var DELETE_PASSWORD_FORGOT_TOKEN = 'DELETE FROM passwordForgotTokens WHERE tokenId = ?'
 
   MySql.prototype.deletePasswordForgotToken = function (tokenId) {
     return this.write(DELETE_PASSWORD_FORGOT_TOKEN, [tokenId])
+      .then(function() { return {} })
   }
 
   var DELETE_PASSWORD_CHANGE_TOKEN = 'DELETE FROM passwordChangeTokens WHERE tokenId = ?'
 
   MySql.prototype.deletePasswordChangeToken = function (tokenId) {
     return this.write(DELETE_PASSWORD_CHANGE_TOKEN, [tokenId])
+      .then(function() { return {} })
   }
 
   // BATCH
@@ -399,6 +411,14 @@ module.exports = function (log, error) {
 
   MySql.prototype.verifyEmail = function (uid) {
     return this.write(VERIFY_EMAIL, [uid])
+      .then(
+        function(results) {
+          if ( results.affectedRows === 0 ) {
+            throw error.notFound()
+          }
+          return {}
+        }
+      )
   }
 
   MySql.prototype.forgotPasswordVerified = function (tokenId, accountResetToken) {
@@ -517,7 +537,7 @@ module.exports = function (log, error) {
       .then(
         function (result) {
           log.trace({ op: 'MySql.write', sql: sql, result: result })
-          return {}
+          return result
         },
         function (err) {
           log.error({ op: 'MySql.write', sql: sql, err: err })

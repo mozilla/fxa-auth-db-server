@@ -64,9 +64,9 @@ test(
 )
 
 test(
-  'add account, retrieve it, delete it',
+  'add account, retrieve it, verify it, delete it',
   function (t) {
-    t.plan(31)
+    t.plan(34)
     var user = fake.newUserDataHex()
     client.putThen('/account/' + user.accountId, user.account)
       .then(function(r) {
@@ -102,6 +102,20 @@ test(
         t.equal(user.account.emailVerified, !!account.emailVerified, 'Both fields emailVerified are the same')
       })
       .then(function() {
+        return client.postThen('/account/' + user.accountId + '/verifyEmail')
+          .then(function() {
+            return client.getThen('/emailRecord/' + emailToHex(user.account.email))
+          })
+      })
+      .then(function(r) {
+        var account = r.obj
+        var fields = 'accountId,email,emailCode,kA,verifierVersion,verifyHash,authSalt'.split(',')
+        fields.forEach(function(f) {
+          t.equal(user.account[f], account[f], 'Both Fields ' + f + ' are the same')
+        })
+        t.equal(user.account.emailVerified, !account.emailVerified, 'Account is now verified')
+      })
+      .then(function() {
         return client.delThen('/account/' + user.accountId)
       })
       .then(function(r) {
@@ -120,6 +134,23 @@ test(
         t.end()
       }, function(err) {
         t.fail(err)
+        t.end()
+      })
+  }
+)
+
+
+test(
+  'verify unknown account',
+  function (t) {
+    t.plan(2)
+    var user = fake.newUserDataHex()
+    return client.postThen('/account/' + user.accountId + '/verifyEmail')
+      .then(function() {
+        t.fail('Verifying an unknown account should have failed')
+        t.end()
+      }, function(err) {
+        testNotFound(t, err)
         t.end()
       })
   }
