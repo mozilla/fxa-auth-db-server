@@ -528,6 +528,20 @@ DB.connect(config)
       )
 
       test(
+        'db.resetAccount for unknown account',
+        function (t) {
+          t.plan(1)
+          var uid = uuid.v4('binary')
+          return db.resetAccount(uid, ACCOUNT)
+            .then(function(res) {
+              t.fail('Resetting an unknown account should have errored, instead it was successful')
+            }, function(err) {
+              t.pass('Correct, we errored when resetting an unknown account')
+            })
+        }
+      )
+
+      test(
         'account deletion',
         function (t) {
           t.plan(1)
