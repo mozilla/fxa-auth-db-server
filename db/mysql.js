@@ -326,9 +326,18 @@ module.exports = function (log, error) {
           'accountResetTokens',
           'passwordChangeTokens',
           'passwordForgotTokens',
-          'accounts'
         ]
         var queries = deleteFromTablesWhereUid(connection, tables, uid)
+        queries.push(
+          query(connection, 'DELETE FROM accounts WHERE uid = ?', uid)
+          .then(function(res) {
+            if ( res.affectedRows === 0 ) {
+              return P.reject(error.notFound())
+            }
+            return P.resolve(res)
+          })
+        )
+
         return P.all(queries)
       }
     )

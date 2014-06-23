@@ -560,6 +560,20 @@ DB.connect(config)
       )
 
       test(
+        'db.deleteAccount for unknown account',
+        function (t) {
+          t.plan(1)
+          var uid = uuid.v4('binary')
+          return db.deleteAccount(uid, ACCOUNT)
+            .then(function(res) {
+              t.fail('Deleting an unknown account should have errored, instead it was successful')
+            }, function(err) {
+              t.pass('Correct, we errored when deleting an unknown account')
+            })
+        }
+      )
+
+      test(
         'teardown',
         function (t) {
           return db.close()
