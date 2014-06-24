@@ -320,9 +320,12 @@ DB.connect(config)
             return db.verifyEmail(uuid.v4('binary'))
           })
           .then(function(res) {
-            t.deepEqual(res, {}, 'No matter what happens, we get an empty object back')
+            t.fail('We should have failed this since this account is non-existant')
           }, function(err) {
-            t.fail('We should not have failed this .verifyEmail() request')
+            t.equal(err.code, 404, 'code')
+            t.equal(err.errno, 116, 'errno')
+            t.equal(err.message, 'Not Found', 'message')
+            t.equal(err.error, 'Not Found', 'error')
           })
         }
       )
@@ -525,6 +528,20 @@ DB.connect(config)
       )
 
       test(
+        'db.resetAccount for unknown account',
+        function (t) {
+          t.plan(1)
+          var uid = uuid.v4('binary')
+          return db.resetAccount(uid, ACCOUNT)
+            .then(function(res) {
+              t.fail('Resetting an unknown account should have errored, instead it was successful')
+            }, function(err) {
+              t.pass('Correct, we errored when resetting an unknown account')
+            })
+        }
+      )
+
+      test(
         'account deletion',
         function (t) {
           t.plan(1)
@@ -538,6 +555,20 @@ DB.connect(config)
               t.fail('account should no longer exist for this email address')
             }, function(err) {
               t.pass('account no longer exists for this email address')
+            })
+        }
+      )
+
+      test(
+        'db.deleteAccount for unknown account',
+        function (t) {
+          t.plan(1)
+          var uid = uuid.v4('binary')
+          return db.deleteAccount(uid, ACCOUNT)
+            .then(function(res) {
+              t.fail('Deleting an unknown account should have errored, instead it was successful')
+            }, function(err) {
+              t.pass('Correct, we errored when deleting an unknown account')
             })
         }
       )
