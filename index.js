@@ -3,51 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 var restify = require('restify')
-var error = require('../error')
-var bufferize = require('../bufferize')
-var config = require('../config')
-var log = require('../log')(config.logLevel, 'db-api')
-var DB = require('../db/mysql')(log, error)
-var pkg = require('../package.json')
+var bufferize = require('./bufferize')
 
-var MemoryMonitor = require('../memory_monitor')
-var memoryMonitor = new MemoryMonitor()
-memoryMonitor.on(
-  'mem',
-  function (usage) {
-    log.stat(
-      {
-        stat: 'mem',
-        rss: usage.rss,
-        heapTotal: usage.heapTotal,
-        heapUsed: usage.heapUsed
-      }
-    )
-  }
-)
-memoryMonitor.start()
-
-process.on(
-  'uncaughtException',
-  function (err) {
-    log.fatal({
-      op: 'uncaughtException',
-      err: err
-    })
-    process.exit(8)
-  }
-)
-
-function shutdown() {
-  process.nextTick(process.exit)
-}
-
-// defer to allow ass code coverage results to complete processing
-if (process.env.ASS_CODE_COVERAGE) {
-  process.on('SIGINT', shutdown)
-}
-
-function startServer(db) {
+module.exports = function createServer(version, db, log, port, host) {
+  port = port || 8000
+  host = host || '0.0.0.0'
 
   function reply(fn) {
     return function (req, res, next) {
@@ -138,18 +98,18 @@ function startServer(db) {
   api.get(
     '/',
     function (req, res, next) {
-      res.send({ version: pkg.version, patchLevel: db.patchLevel })
+      res.send({ version: version })
       next()
     }
   )
 
   api.listen(
-    config.port,
-    config.hostname,
+    port,
+    host,
     function () {
-      log.info({ op: 'listening', port: config.port, host: config.hostname })
+      log.info({ op: 'listening', port: port, host: host })
     }
   )
-}
 
-DB.connect(config).done(startServer)
+  return api
+}

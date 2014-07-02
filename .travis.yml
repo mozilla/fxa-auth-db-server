@@ -3,9 +3,6 @@ language: node_js
 node_js:
  - "0.10"
 
-services:
- - mysql
-
 notifications:
   email:
     - dcoates@mozilla.com
@@ -19,10 +16,7 @@ notifications:
     skip_join: false
 
 install:
-  - npm install --no-optional
-
-before_script:
-  - mysql -e 'DROP DATABASE IF EXISTS fxa'
+  - npm install
 
 script:
   - npm test
