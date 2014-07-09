@@ -107,6 +107,7 @@ function startServer(db) {
   api.get('/account/:id/devices', reply(db.accountDevices))
   api.post('/account/:id/reset', reply(db.resetAccount))
   api.post('/account/:id/verifyEmail', reply(db.verifyEmail))
+  api.post('/account/:id/locale', reply(db.updateLocale))
 
   api.get('/sessionToken/:id', reply(db.sessionToken))
   api.del('/sessionToken/:id', reply(db.deleteSessionToken))

@@ -441,6 +441,39 @@ test(
 )
 
 test(
+  'locale',
+  function (t) {
+    var user = fake.newUserDataHex()
+    client.putThen('/account/' + user.accountId, user.account)
+      .then(
+        function (r) {
+          respOk(t, r)
+          return client.putThen('/sessionToken/' + user.sessionTokenId, user.sessionToken)
+        }
+      )
+      .then(
+        function (r) {
+          respOk(t, r)
+          return client.postThen('/account/' + user.accountId + '/locale', { locale: 'en-US'})
+        }
+      )
+      .then(
+        function (r) {
+          respOk(t, r)
+          return client.getThen('/sessionToken/' + user.sessionTokenId)
+        }
+      )
+      .done(
+        function (r) {
+          respOk(t, r)
+          t.equal('en-US', r.obj.locale, 'locale was set properly')
+          t.end()
+        }
+      )
+  }
+)
+
+test(
   'teardown',
   function (t) {
     t.plan(1)

@@ -115,8 +115,8 @@ module.exports = function (log, error) {
   // CREATE
   var CREATE_ACCOUNT = 'INSERT INTO accounts' +
     ' (uid, normalizedEmail, email, emailCode, emailVerified, kA, wrapWrapKb,' +
-    ' authSalt, verifierVersion, verifyHash, verifierSetAt, createdAt)' +
-    ' VALUES (?, LOWER(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ' authSalt, verifierVersion, verifyHash, verifierSetAt, createdAt, locale)' +
+    ' VALUES (?, LOWER(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 
   MySql.prototype.createAccount = function (uid, data) {
     data.normalizedEmail = data.email
@@ -136,7 +136,8 @@ module.exports = function (log, error) {
         data.verifierVersion,
         data.verifyHash,
         data.verifierSetAt,
-        data.createdAt
+        data.createdAt,
+        data.locale
       ]
     )
   }
@@ -239,7 +240,7 @@ module.exports = function (log, error) {
   }
 
   var SESSION_TOKEN = 'SELECT t.tokenData, t.uid, t.createdAt,' +
-    ' a.emailVerified, a.email, a.emailCode, a.verifierSetAt' +
+    ' a.emailVerified, a.email, a.emailCode, a.verifierSetAt, a.locale' +
     ' FROM sessionTokens t, accounts a' +
     ' WHERE t.tokenId = ? AND t.uid = a.uid'
 
@@ -292,7 +293,7 @@ module.exports = function (log, error) {
   }
 
   var ACCOUNT = 'SELECT uid, email, normalizedEmail, emailCode, emailVerified, kA,' +
-    ' wrapWrapKb, verifierVersion, verifyHash, authSalt, verifierSetAt, createdAt' +
+    ' wrapWrapKb, verifierVersion, verifyHash, authSalt, verifierSetAt, createdAt, locale' +
     ' FROM accounts WHERE uid = ?'
 
   MySql.prototype.account = function (uid) {
@@ -428,6 +429,12 @@ module.exports = function (log, error) {
         ])
       }
     )
+  }
+
+  var UPDATE_LOCALE = 'UPDATE accounts SET locale = ? WHERE uid = ?'
+
+  MySql.prototype.updateLocale = function (uid, data) {
+    return this.write(UPDATE_LOCALE, [data.locale, uid])
   }
 
   // Internal
