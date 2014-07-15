@@ -7,7 +7,7 @@ var P = require('../../promise')
 var test = require('tap').test
 var error = require('../../error')
 var config = require('../../config')
-var log = { trace: console.log, error: console.log }
+var log = { trace: console.log, error: console.log, stat: console.log }
 var DB = require('../../db/mysql')(log, error)
 
 config.patchLevel = 1000000
@@ -39,5 +39,3 @@ DB.connect(config)
       )
     }
   )
-
-

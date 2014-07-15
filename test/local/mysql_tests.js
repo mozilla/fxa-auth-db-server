@@ -7,7 +7,7 @@ var P = require('../../promise')
 var test = require('../ptaptest')
 var error = require('../../error')
 var config = require('../../config')
-var log = { trace: console.log, error: console.log }
+var log = { trace: console.log, error: console.log, stat: console.log }
 var DB = require('../../db/mysql')(log, error)
 
 DB.connect(config)
