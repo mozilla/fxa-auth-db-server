@@ -4,23 +4,22 @@
 
 var restify = require('restify')
 var bufferize = require('./bufferize')
+var version = require('./package.json').version
 
-module.exports = function createServer(version, db, log, port, host) {
-  port = port || 8000
-  host = host || '0.0.0.0'
+module.exports = function createServer(db) {
 
   function reply(fn) {
     return function (req, res, next) {
       fn.call(db, req.params.id, req.body)
         .then(
           function (result) {
-            log.info(
+            api.emit(
+              'success',
               {
-                op: 'request.summary',
-                code: 200,
                 route: req.route.name,
                 method: req.method,
-                path: req.url,
+                url: req.url,
+                result: result,
                 t: Date.now() - req.time()
               }
             )
@@ -36,21 +35,17 @@ module.exports = function createServer(version, db, log, port, host) {
               err = { message: err || 'none' }
             }
             var statusCode = err.code || 500
-            var msg = {
-              op: 'request.summary',
-              code: statusCode,
-              route: req.route.name,
-              method: req.method,
-              path: req.url,
-              err: err,
-              t: Date.now() - req.time()
-            }
-            if (statusCode >= 500) {
-              log.error(msg)
-            }
-            else {
-              log.warn(msg)
-            }
+            api.emit(
+              'failure',
+              {
+                route: req.route.name,
+                method: req.method,
+                url: req.url,
+                err: err,
+                t: Date.now() - req.time()
+              }
+            )
+
             res.send(statusCode, err)
           }
         )
@@ -67,6 +62,7 @@ module.exports = function createServer(version, db, log, port, host) {
   api.get('/account/:id/devices', reply(db.accountDevices))
   api.post('/account/:id/reset', reply(db.resetAccount))
   api.post('/account/:id/verifyEmail', reply(db.verifyEmail))
+  api.post('/account/:id/locale', reply(db.updateLocale))
 
   api.get('/sessionToken/:id', reply(db.sessionToken))
   api.del('/sessionToken/:id', reply(db.deleteSessionToken))
@@ -100,14 +96,6 @@ module.exports = function createServer(version, db, log, port, host) {
     function (req, res, next) {
       res.send({ version: version })
       next()
-    }
-  )
-
-  api.listen(
-    port,
-    host,
-    function () {
-      log.info({ op: 'listening', port: port, host: host })
     }
   )
 
