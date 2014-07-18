@@ -229,8 +229,8 @@ module.exports = function (log, error) {
 
   var ACCOUNT_EXISTS = 'SELECT uid FROM accounts WHERE normalizedEmail = LOWER(?)'
 
-  MySql.prototype.accountExists = function (email) {
-    return this.readOne(ACCOUNT_EXISTS, Buffer(email, 'hex').toString('utf8'))
+  MySql.prototype.accountExists = function (emailBuffer) {
+    return this.readOne(ACCOUNT_EXISTS, emailBuffer.toString('utf8'))
   }
 
   var ACCOUNT_DEVICES = 'SELECT tokenId as id FROM sessionTokens WHERE uid = ?'
@@ -288,8 +288,8 @@ module.exports = function (log, error) {
     ' FROM accounts' +
     ' WHERE normalizedEmail = LOWER(?)'
 
-  MySql.prototype.emailRecord = function (email) {
-    return this.readOne(EMAIL_RECORD, Buffer(email, 'hex').toString('utf8'))
+  MySql.prototype.emailRecord = function (emailBuffer) {
+    return this.readOne(EMAIL_RECORD, emailBuffer.toString('utf8'))
   }
 
   var ACCOUNT = 'SELECT uid, email, normalizedEmail, emailCode, emailVerified, kA,' +

@@ -10,8 +10,8 @@ There are a number of methods that a DB storage backend should implement:
     * .resetAccount(uid, data)
     * .deleteAccount(uid)
 * Accounts (using `email`)
-    * .emailRecord(email)
-    * .accountExists(email)
+    * .emailRecord(emailBuffer)
+    * .accountExists(emailBuffer)
 * Session Tokens
     * .createSessionToken(tokenId, sessionToken)
     * .sessionToken(id)
@@ -169,14 +169,14 @@ Returns:
 * rejects with:
     * any errors from the underlying storage engine
 
-## .emailRecord(email) ##
+## .emailRecord(emailBuffer) ##
 
-Gets the account record related to this (normalized) email address.
+Gets the account record related to this (normalized) email address. The email is provided in a Buffer.
 
 Parameters:
 
-* email: the email address will be a hex encoded string, which is converted back to a string, then `.toLowerCase()`. In
-  the MySql backend we use `LOWER(?)` which uses the current locale for case-folding.
+* emailBuffer: the email address will be a hex encoded string, which is converted back to a string, then
+  `.toLowerCase()`. In the MySql backend we use `LOWER(?)` which uses the current locale for case-folding.
 
 Returns:
 

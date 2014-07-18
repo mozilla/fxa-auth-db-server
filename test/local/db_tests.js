@@ -95,8 +95,8 @@ DB.connect(config)
         'account creation',
         function (t) {
           t.plan(31)
-          var hexEmail = Buffer(ACCOUNT.email).toString('hex')
-          return db.accountExists(hexEmail)
+          var emailBuffer = Buffer(ACCOUNT.email)
+          return db.accountExists(emailBuffer)
           .then(function(exists) {
             t.fail('account should not yet exist for this email address')
           }, function(err) {
@@ -107,8 +107,8 @@ DB.connect(config)
           })
           .then(function(account) {
             t.deepEqual(account, {}, 'Returned an empty object on account creation')
-            var hexEmail = Buffer(ACCOUNT.email).toString('hex')
-            return db.accountExists(hexEmail)
+            var emailBuffer = Buffer(ACCOUNT.email)
+            return db.accountExists(emailBuffer)
           })
           .then(function(exists) {
             t.ok(exists, 'account exists for this email address')
@@ -132,8 +132,8 @@ DB.connect(config)
           })
           .then(function() {
             t.pass('Retrieving account using email')
-            var hexEmail = Buffer(ACCOUNT.email).toString('hex')
-            return db.emailRecord(hexEmail)
+            var emailBuffer = Buffer(ACCOUNT.email)
+            return db.emailRecord(emailBuffer)
           })
           .then(function(account) {
             t.deepEqual(account.uid, ACCOUNT.uid, 'uid')
@@ -302,8 +302,8 @@ DB.connect(config)
       test(
         'email verification',
         function (t) {
-          var hexEmail = Buffer(ACCOUNT.email).toString('hex')
-          return db.emailRecord(hexEmail)
+          var emailBuffer = Buffer(ACCOUNT.email)
+          return db.emailRecord(emailBuffer)
           .then(function(emailRecord) {
             return db.verifyEmail(emailRecord.uid)
           })
@@ -395,8 +395,8 @@ DB.connect(config)
 
           return db.createAccount(ACCOUNT.uid, ACCOUNT)
             .then(function() {
-              var hexEmail = Buffer(ACCOUNT.email).toString('hex')
-              return db.emailRecord(hexEmail)
+              var emailBuffer = Buffer(ACCOUNT.email)
+              return db.emailRecord(emailBuffer)
             })
             .then(function(result) {
               t.pass('.emailRecord() did not error')
@@ -513,8 +513,8 @@ DB.connect(config)
             })
             .then(function() {
               // account should STILL exist for this email address
-              var hexEmail = Buffer(ACCOUNT.email).toString('hex')
-              return db.accountExists(hexEmail)
+              var emailBuffer = Buffer(ACCOUNT.email)
+              return db.accountExists(emailBuffer)
             })
             .then(function(exists) {
               t.ok(exists, 'account still exists ok')
@@ -531,8 +531,8 @@ DB.connect(config)
           // account should no longer exist for this email address
           return db.deleteAccount(ACCOUNT.uid)
             .then(function() {
-              var hexEmail = Buffer(ACCOUNT.email).toString('hex')
-              return db.accountExists(hexEmail)
+              var emailBuffer = Buffer(ACCOUNT.email)
+              return db.accountExists(emailBuffer)
             })
             .then(function(exists) {
               t.fail('account should no longer exist for this email address')
