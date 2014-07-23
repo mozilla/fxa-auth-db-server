@@ -6,7 +6,7 @@ var restify = require('restify')
 var bufferize = require('./bufferize')
 var version = require('./package.json').version
 
-module.exports = function createServer(db) {
+function createServer(db) {
 
   function reply(fn) {
     return function (req, res, next) {
@@ -100,4 +100,9 @@ module.exports = function createServer(db) {
   )
 
   return api
+}
+
+module.exports = {
+  createServer: createServer,
+  errors: require('./error')
 }
