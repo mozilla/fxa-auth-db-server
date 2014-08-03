@@ -1,3 +1,9 @@
+train-18
+  * use a version of ass that does not pull in gh-badges at all: #58
+  * email argument is already a buffer: #56, #57
+  * add shrinkwrap; npm shrinkwrap --dev: #54
+  * fixed log object not having 'stat' in tests
+
 train-17
   * added locale to accounts #53
 
