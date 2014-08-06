@@ -20,8 +20,8 @@
   "dependencies": {
     "bluebird": "1.2.2",
     "bunyan": "0.22.3",
+    "convict": "0.4.2",
     "mysql": "2.1.1",
-    "rc": "0.3.4",
     "restify": "2.7.0"
   },
   "devDependencies": {
