@@ -1,6 +1,6 @@
 {
   "name": "fxa-auth-db-server",
-  "version": "0.18.0",
+  "version": "1.18.1",
   "description": "Firefox Accounts DB Server",
   "main": "index.js",
   "scripts": {
@@ -17,10 +17,10 @@
   },
   "homepage": "https://github.com/mozilla/fxa-auth-db-server",
   "dependencies": {
-    "restify": "2.8.1"
+    "restify": "2.8.2"
   },
   "devDependencies": {
-    "tap": "0.4.11"
+    "tap": "0.4.12"
   },
   "keywords": [],
   "engines": {
