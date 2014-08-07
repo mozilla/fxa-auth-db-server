@@ -23,6 +23,8 @@ install:
 
 before_script:
   - mysql -e 'DROP DATABASE IF EXISTS fxa'
+  - npm run outdated
+  - grunt validate-shrinkwrap
 
 script:
   - npm test
