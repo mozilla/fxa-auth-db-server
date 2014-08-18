@@ -33,9 +33,21 @@ module.exports = function (fs, path, url, convict) {
     },
     patchLevel: {
       doc: 'The patch level the database should be set to for this release',
-      default: 3,
+      default: 4,
       format: 'nat',
       env: 'SCHEMA_PATCH_LEVEL',
+    },
+    enablePruning: {
+      doc: 'Enables (true) or disables (false) pruning',
+      default: false,
+      format: Boolean,
+      env: 'ENABLE_PRUNING',
+    },
+    pruneEvery: {
+      doc: 'Approximate time between prunes (in ms)',
+      default: 30 * 60 * 1000,
+      format: 'nat',
+      env: 'PRUNE_EVERY',
     },
     master: {
       user: {
