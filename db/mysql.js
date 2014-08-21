@@ -5,6 +5,8 @@
 var mysql = require('mysql')
 var P = require('../promise')
 
+var patch = require('./patch')
+
 // http://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html
 const ER_TOO_MANY_CONNECTIONS = 1040
 const ER_DUP_ENTRY = 1062
@@ -106,18 +108,21 @@ module.exports = function (log, error) {
       .then(
         function (result) {
           mysql.patchLevel = +result.value
-          if (
-            mysql.patchLevel < options.patchLevel ||
-            mysql.patchLevel > options.patchLevel + 1
-          ) {
-            throw new Error('dbIncorrectPatchLevel')
-          }
-          log.trace({
+
+          log.info({
             op: 'MySql.connect',
             patchLevel: mysql.patchLevel,
-            patchLevelRequired: options.patchLevel
+            patchLevelRequired: patch.level
           })
-          return mysql
+
+          if (
+            mysql.patchLevel === patch.level ||
+            mysql.patchLevel === patch.level + 1
+          ) {
+            return mysql
+          }
+
+          throw new Error('dbIncorrectPatchLevel')
         }
       )
   }

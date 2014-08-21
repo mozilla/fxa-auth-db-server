@@ -9,7 +9,7 @@ var crypto = require('crypto')
 var uuid = require('uuid')
 var error = require('../../error')
 var config = require('../../config')
-var log = { trace: console.log, error: console.log, stat: console.log }
+var log = { trace: console.log, error: console.log, stat: console.log, info: console.log }
 var DB = require('../../db/mysql')(log, error)
 
 var zeroBuffer16 = Buffer('00000000000000000000000000000000', 'hex')

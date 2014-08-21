@@ -31,12 +31,6 @@ module.exports = function (fs, path, url, convict) {
       default: 'schema-patch-level',
       env: 'SCHEMA_PATCH_KEY',
     },
-    patchLevel: {
-      doc: 'The patch level the database should be set to for this release',
-      default: 4,
-      format: 'nat',
-      env: 'SCHEMA_PATCH_LEVEL',
-    },
     enablePruning: {
       doc: 'Enables (true) or disables (false) pruning',
       default: false,

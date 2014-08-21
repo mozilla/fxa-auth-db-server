@@ -7,6 +7,7 @@ var TestServer = require('../test_server')
 var pkg = require('../../package.json')
 var config = require('../../config')
 var clientThen = require('../client-then')
+var patch = require('../../db/patch')
 
 var cfg = {
   port: 8000
@@ -32,8 +33,8 @@ test(
       .then(function(r) {
         t.equal(r.res.statusCode, 200, 'returns a 200')
         t.equal(r.obj.version, pkg.version, 'Version reported is the same a package.json')
-        t.equal(r.obj.patchLevel, config.patchLevel, 'Patch level is the same as the one set in config')
-        t.deepEqual(r.obj, { version : pkg.version, patchLevel : config.patchLevel }, 'Object contains no other fields')
+        t.equal(r.obj.patchLevel, patch.level, 'Patch level is the same as the one set in config')
+        t.deepEqual(r.obj, { version : pkg.version, patchLevel : patch.level }, 'Object contains no other fields')
         t.end()
       })
   }
