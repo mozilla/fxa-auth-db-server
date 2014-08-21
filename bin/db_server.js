@@ -32,7 +32,7 @@ process.on(
   function (err) {
     log.fatal({
       op: 'uncaughtException',
-      err: err
+      err: (err && err.stack) || err
     })
     process.exit(8)
   }
