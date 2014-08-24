@@ -4,10 +4,11 @@
 
 var path = require('path')
 var fs = require('fs')
+var argh = require('argh');
 var mysql = require('mysql')
 var P = require('../promise.js')
-var options = require('../config')
-var log = require('../log')(options.logLevel, 'db-patcher')
+var config = require('../config')
+var log = require('../log')(config.logLevel, 'db-patcher')
 
 var schemaDir = path.join(__dirname, '..', 'db', 'schema')
 var patches = {}
@@ -28,20 +29,28 @@ files.forEach(function(filename) {
 })
 
 // To run any patches we need to switch multipleStatements on
-options.master.multipleStatements = true
+config.master.multipleStatements = true
 
 // when creating the database, we need to connect without a database name
-var database = options.master.database
-delete options.master.database
+var database = config.master.database
+delete config.master.database
 
-var client = mysql.createConnection(options.master)
+var client = mysql.createConnection(config.master)
 
 createDatabase()
   .then(changeUser)
   .then(checkDbMetadataExists)
   .then(readDbPatchLevel)
-  .then(patchToRequiredLevel)
-  .then(closeAndReconnect)
+  .then(figureOutPatchesToBeApplied)
+  .then(function(patchesToApply) {
+    if ( argh.argv['dry-run'] ) {
+      return patchToRequiredLevelDryRun(patchesToApply)
+    }
+    else {
+      return patchToRequiredLevel(patchesToApply)
+    }
+  })
+  .then(close)
   .done(
     function() {
       log.info('Patching complete')
@@ -74,8 +83,8 @@ function changeUser() {
   log.trace( { op: 'MySql.createSchema:ChangeUser' } )
   client.changeUser(
     {
-      user     : options.master.user,
-      password : options.master.password,
+      user     : config.master.user,
+      password : config.master.password,
       database : database
     },
     function (err) {
@@ -119,7 +128,7 @@ function readDbPatchLevel(dbMetadataExists) {
   var query = "SELECT value FROM dbMetadata WHERE name = ?"
   client.query(
     query,
-    [ options.patchKey ],
+    [ config.patchKey ],
     function(err, result) {
       if (err) {
         log.trace( { op: 'MySql.createSchema:ReadDbPatchLevel', err: err.message } )
@@ -132,37 +141,36 @@ function readDbPatchLevel(dbMetadataExists) {
   return d.promise
 }
 
-function patchToRequiredLevel(currentPatchLevel) {
-  log.trace( { op: 'MySql.createSchema:PatchToRequiredLevel' } )
+function figureOutPatchesToBeApplied(currentPatchLevel) {
+  log.trace( { op: 'MySql.createSchema:FigureOutPatchesToBeApplied' } )
 
   // if we don't need any patches
-  if ( options.patchLevel === currentPatchLevel ) {
-    log.trace( { op: 'MySql.createSchema:PatchToRequiredLevel', patch: 'No patch required' } )
-    return P.resolve()
+  if ( config.patchLevel === currentPatchLevel ) {
+    log.trace( { op: 'MySql.createSchema:FigureOutPatchesToBeApplied', patch: 'No patch required' } )
+    return P.resolve([])
   }
 
   // We don't want any reverse patches to be automatically applied, so
   // just emit a warning and carry on.
-  if ( options.patchLevel < currentPatchLevel ) {
-    log.warn( { op: 'MySql.createSchema:PatchToRequiredLevel', err: 'Reverse patch required - must be done manually' } )
-    return P.resolve()
+  if ( config.patchLevel < currentPatchLevel ) {
+    log.warn( { op: 'MySql.createSchema:FigureOutPatchesToBeApplied', err: 'Reverse patch required - must be done manually' } )
+    return P.resolve([])
   }
 
   log.trace({
-    op: 'MySql.createSchema:PatchToRequiredLevel',
-    msg1: 'Patching from ' + currentPatchLevel + ' to ' + options.patchLevel
+    op: 'MySql.createSchema:FigureOutPatchesToBeApplied',
+    msg1: 'Patching from ' + currentPatchLevel + ' to ' + config.patchLevel
   })
 
-  var promise = P.resolve()
   var patchesToApply = []
 
   // First, loop through all the patches we need to apply
   // to make sure they exist.
-  while ( currentPatchLevel < options.patchLevel ) {
+  while ( currentPatchLevel < config.patchLevel ) {
     // check that this patch exists
     if ( !patches[currentPatchLevel][currentPatchLevel+1] ) {
       log.fatal({
-        op: 'MySql.createSchema:PatchToRequiredLevel',
+        op: 'MySql.createSchema:FigureOutPatchesToBeApplied',
         err: 'Patch from level ' + currentPatchLevel + ' to ' + (currentPatchLevel+1) + ' does not exist'
       });
       process.exit(2)
@@ -175,11 +183,29 @@ function patchToRequiredLevel(currentPatchLevel) {
     currentPatchLevel += 1
   }
 
+  return P.resolve(patchesToApply)
+}
+
+function patchToRequiredLevelDryRun(patchesToApply) {
+  log.trace( { op: 'MySql.createSchema:PatchToRequiredLevelDryRun' } )
+
+  patchesToApply.forEach(function(patch) {
+    log.info({ op: 'MySql.createSchema:PatchToRequiredLevelDryRun', msg1: 'Would update DB for patch ' + patch.from + ' to ' + patch.to })
+  })
+
+  return P.resolve()
+}
+
+function patchToRequiredLevel(patchesToApply) {
+  log.trace( { op: 'MySql.createSchema:PatchToRequiredLevel' } )
+
+  var promise = P.resolve()
+
   // now apply each patch
   patchesToApply.forEach(function(patch) {
     promise = promise.then(function() {
       var d = P.defer()
-      log.trace({ op: 'MySql.createSchema:PatchToRequiredLevel', msg1: 'Updating DB for patch ' + patch.from + ' to ' + patch.to })
+      log.info({ op: 'MySql.createSchema:PatchToRequiredLevel', msg1: 'Updating DB for patch ' + patch.from + ' to ' + patch.to })
       client.query(
         patch.sql,
         function(err) {
@@ -194,9 +220,9 @@ function patchToRequiredLevel(currentPatchLevel) {
   return promise
 }
 
-function closeAndReconnect() {
+function close() {
   var d = P.defer()
-  log.trace( { op: 'MySql.createSchema:CloseAndReconnect' } )
+  log.trace( { op: 'MySql.createSchema:Close' } )
   client.end(
     function (err) {
       if (err) {
@@ -204,9 +230,8 @@ function closeAndReconnect() {
         return d.reject(err)
       }
 
-      // create the mysql class
-      log.trace( { op: 'MySql.createSchema:ResolvingWithNewClient' } )
-      d.resolve('ok')
+      log.trace( { op: 'MySql.createSchema:Closed' } )
+      d.resolve()
     }
   )
   return d.promise
