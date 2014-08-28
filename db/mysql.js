@@ -44,7 +44,7 @@ module.exports = function (log, error) {
     function prune() {
       this.pruneTokens().done(
         function() {
-          log.trace({ op: 'db.pruneTokens', msg: 'Finished' })
+          log.info({ op: 'db.pruneTokens', msg: 'Finished' })
         },
         function(err) {
           log.error({ op: 'db.pruneTokens', err: err })
@@ -612,7 +612,7 @@ module.exports = function (log, error) {
 
   var PRUNE = "CALL prune(?, ?)"
   MySql.prototype.pruneTokens = function () {
-    log.trace({  op : 'MySql.pruneTokens' })
+    log.info({  op : 'MySql.pruneTokens' })
 
     var now = Date.now()
     var pruneBefore = now - this.options.pruneEvery

@@ -5,7 +5,7 @@ require('ass')
 var test = require('../ptaptest')
 var error = require('../../error')
 var config = require('../../config')
-var log = { trace: console.log, error: console.log }
+var log = { trace: console.log, error: console.log, info: console.log }
 var DB = require('../../db/mysql')(log, error)
 var P = require('../../promise')
 var fake = require('../fake')
