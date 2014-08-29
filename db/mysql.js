@@ -5,10 +5,22 @@
 var mysql = require('mysql')
 var P = require('../promise')
 
+// http://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html
+const ER_TOO_MANY_CONNECTIONS = 1040
+const ER_DUP_ENTRY = 1062
+const ER_LOCK_WAIT_TIMEOUT = 1205
+const ER_LOCK_TABLE_FULL = 1206
+const ER_LOCK_DEADLOCK = 1213
+const ER_LOCK_ABORTED = 1689
+
 module.exports = function (log, error) {
 
-  // http://dev.mysql.com/doc/refman/5.5/en/error-messages-server.html
-  var LOCK_ERRNOS = [ 1205, 1206, 1213, 1689 ]
+  var LOCK_ERRNOS = [
+    ER_LOCK_WAIT_TIMEOUT,
+    ER_LOCK_TABLE_FULL,
+    ER_LOCK_DEADLOCK,
+    ER_LOCK_ABORTED
+  ]
 
   // make a pool of connections that we can draw from
   function MySql(options) {
@@ -548,7 +560,7 @@ module.exports = function (log, error) {
         },
         function (err) {
           log.error({ op: 'MySql.write', sql: sql, err: err })
-          if (err.errno === 1062) {
+          if (err.errno === ER_DUP_ENTRY) {
             err = error.duplicate()
           }
           else {
@@ -562,7 +574,7 @@ module.exports = function (log, error) {
   MySql.prototype.getConnection = function (name) {
     return retryable(
       this.getClusterConnection,
-      [1040, 'ECONNREFUSED', 'ETIMEDOUT', 'ECONNRESET']
+      [ER_TOO_MANY_CONNECTIONS, 'ECONNREFUSED', 'ETIMEDOUT', 'ECONNRESET']
     )
   }
 
