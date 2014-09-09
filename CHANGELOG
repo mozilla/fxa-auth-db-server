@@ -1,5 +1,11 @@
+train-21
+  * remove patchLevel from config, now in code - #69, #70
+  * update node-ass version - #75
+  * Use named mysql error constants rather than raw magic numbers - #74
+  * show prune messages at loglevel info - #73
+
 train-20
-  * add code to remove stale tokens from 
+  * add code to remove stale tokens from
     fxa.{accountReset,passwordForgot,passwordChange}Tokens tables - issue #2
     - adds PROCEDURE `prune` to fxa database
     - controlled by options `pruneEvery' and `enablePruning'
