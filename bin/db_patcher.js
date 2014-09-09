@@ -10,12 +10,14 @@ var options = require('../config')
 var log = require('../log')(options.logLevel, 'db-patcher')
 var patcher = require('mysql-patcher')
 
+var patch = require('../db/patch')
+
 // set some options
 var options = options.master
 options.dir = path.join(__dirname, '..', 'db', 'schema')
 options.patchKey = 'schema-patch-level'
 options.metaTable = 'dbMetadata'
-options.patchLevel = 4
+options.patchLevel = patch.level
 options.mysql = mysql
 options.createDatabase = true
 options.reversePatchAllowed = false
