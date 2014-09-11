@@ -9,7 +9,7 @@ module.exports = function (grunt) {
   grunt.initConfig({
     copyright: {
       files: [
-        "{,bin/,db/}*.js"
+        "{,bin/,config/,db/,scripts/}*.js"
       ],
       options: {
         pattern: "This Source Code Form is subject to the terms of the Mozilla Public"
@@ -17,7 +17,7 @@ module.exports = function (grunt) {
     },
     jshint: {
       files: [
-        "{,bin/,db/}*.{js,json}"
+        "{,bin/,config/,db/,scripts/,test/**/}*.{js,json}"
       ],
       options: {
         jshintrc: ".jshintrc"

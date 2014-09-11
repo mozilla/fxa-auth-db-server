@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 require('ass')
-var P = require('../../promise')
 var test = require('../ptaptest')
 var crypto = require('crypto')
 var uuid = require('uuid')
@@ -25,7 +24,7 @@ var ACCOUNT = {
   authSalt: zeroBuffer32,
   kA: zeroBuffer32,
   wrapWrapKb: zeroBuffer32,
-  verifierSetAt: Date.now(),
+  verifierSetAt: Date.now()
 }
 
 function hex(len) {
@@ -33,14 +32,14 @@ function hex(len) {
 }
 function hex16() { return hex(16) }
 function hex32() { return hex(32) }
-function hex64() { return hex(64) }
+// function hex64() { return hex(64) }
 function hex96() { return hex(96) }
 
 var SESSION_TOKEN_ID = hex32()
 var SESSION_TOKEN = {
   data : hex32(),
   uid : ACCOUNT.uid,
-  createdAt: Date.now(),
+  createdAt: Date.now()
 }
 
 var KEY_FETCH_TOKEN_ID = hex32()
@@ -48,7 +47,7 @@ var KEY_FETCH_TOKEN = {
   authKey : hex32(),
   uid : ACCOUNT.uid,
   keyBundle : hex96(),
-  createdAt: Date.now(),
+  createdAt: Date.now()
 }
 
 var PASSWORD_FORGOT_TOKEN_ID = hex32()
@@ -57,21 +56,21 @@ var PASSWORD_FORGOT_TOKEN = {
   uid : ACCOUNT.uid,
   passCode : hex16(),
   tries : 1,
-  createdAt: Date.now(),
+  createdAt: Date.now()
 }
 
 var PASSWORD_CHANGE_TOKEN_ID = hex32()
 var PASSWORD_CHANGE_TOKEN = {
   data : hex32(),
   uid : ACCOUNT.uid,
-  createdAt: Date.now(),
+  createdAt: Date.now()
 }
 
 var ACCOUNT_RESET_TOKEN_ID = hex32()
 var ACCOUNT_RESET_TOKEN = {
   data : hex32(),
   uid : ACCOUNT.uid,
-  createdAt: Date.now(),
+  createdAt: Date.now()
 }
 
 DB.connect(config)

@@ -1,6 +1,7 @@
 {
   "asi": true,
   "eqeqeq": true,
+  "es3": false,
   "esnext": true,
   "forin": false,
   "maxerr": 100,
