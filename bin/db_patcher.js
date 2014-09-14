@@ -3,9 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 var path = require('path')
-var fs = require('fs')
 var mysql = require('mysql')
-var P = require('../promise.js')
 var options = require('../config')
 var log = require('../log')(options.logLevel, 'db-patcher')
 var patcher = require('mysql-patcher')
