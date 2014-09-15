@@ -8,11 +8,21 @@ module.exports = function (grunt) {
 
   grunt.initConfig({
     copyright: {
-      files: [
-        "{,bin/,config/,db/,scripts/}*.js"
-      ],
-      options: {
-        pattern: "This Source Code Form is subject to the terms of the Mozilla Public"
+      app: {
+        src: [
+          "{,bin/,config/,db/,scripts/}*.js"
+        ],
+        options: {
+          pattern: "This Source Code Form is subject to the terms of the Mozilla Public"
+        }
+      },
+      tests: {
+        src: [
+          'test/{remote,local}/*.js'
+        ],
+        options: {
+          pattern: 'Any copyright is dedicated to the Public Domain.'
+        }
       }
     },
     jshint: {
