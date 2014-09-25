@@ -148,9 +148,9 @@ test(
         t.deepEqual(token.tokenData, user.sessionToken.data, 'token data matches')
         t.deepEqual(token.uid, user.accountId, 'token belongs to this account')
         t.ok(token.createdAt, 'Got a createdAt')
-        t.equal(!!token.emailVerified, user.account.emailVerified)
-        t.equal(token.email, user.account.email)
-        t.deepEqual(token.emailCode, user.account.emailCode)
+        t.equal(!!token.emailVerified, user.account.emailVerified, 'emailVerified same as account emailVerified')
+        t.equal(token.email, user.account.email, 'token.email same as account email')
+        t.deepEqual(token.emailCode, user.account.emailCode, 'token emailCode same as account emailCode')
         t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
 
         // now delete it
