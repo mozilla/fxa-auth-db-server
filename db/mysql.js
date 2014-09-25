@@ -104,7 +104,7 @@ module.exports = function (log, error) {
     // check that the database patch level is what we expect (or one above)
     var mysql = new MySql(options)
 
-    return mysql.readOne("SELECT value FROM dbMetadata WHERE name = ?", options.patchKey)
+    return mysql.readOneFromMultipleResults("CALL dbMetadata_1(?)", options.patchKey)
       .then(
         function (result) {
           mysql.patchLevel = +result.value
@@ -150,10 +150,7 @@ module.exports = function (log, error) {
   }
 
   // CREATE
-  var CREATE_ACCOUNT = 'INSERT INTO accounts' +
-    ' (uid, normalizedEmail, email, emailCode, emailVerified, kA, wrapWrapKb,' +
-    ' authSalt, verifierVersion, verifyHash, verifierSetAt, createdAt, locale)' +
-    ' VALUES (?, LOWER(?), ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  var CREATE_ACCOUNT = 'CALL createAccount_1(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 
   MySql.prototype.createAccount = function (uid, data) {
     data.normalizedEmail = data.email
@@ -179,9 +176,7 @@ module.exports = function (log, error) {
     )
   }
 
-  var CREATE_SESSION_TOKEN = 'INSERT INTO sessionTokens' +
-    ' (tokenId, tokenData, uid, createdAt)' +
-    ' VALUES (?, ?, ?, ?)'
+  var CREATE_SESSION_TOKEN = 'CALL createSessionToken_1(?, ?, ?, ?)'
 
   MySql.prototype.createSessionToken = function (tokenId, sessionToken) {
     return this.write(
@@ -195,9 +190,7 @@ module.exports = function (log, error) {
     )
   }
 
-  var CREATE_KEY_FETCH_TOKEN = 'INSERT INTO keyFetchTokens' +
-    ' (tokenId, authKey, uid, keyBundle, createdAt)' +
-    ' VALUES (?, ?, ?, ?, ?)'
+  var CREATE_KEY_FETCH_TOKEN = 'CALL createKeyFetchToken_1(?, ?, ?, ?, ?)'
 
   MySql.prototype.createKeyFetchToken = function (tokenId, keyFetchToken) {
     return this.write(
@@ -212,9 +205,7 @@ module.exports = function (log, error) {
     )
   }
 
-  var CREATE_ACCOUNT_RESET_TOKEN = 'REPLACE INTO accountResetTokens' +
-    ' (tokenId, tokenData, uid, createdAt)' +
-    ' VALUES (?, ?, ?, ?)'
+  var CREATE_ACCOUNT_RESET_TOKEN = 'CALL createAccountResetToken_1(?, ?, ?, ?)'
 
   MySql.prototype.createAccountResetToken = function (tokenId, accountResetToken) {
     return this.write(
@@ -228,9 +219,7 @@ module.exports = function (log, error) {
     )
   }
 
-  var CREATE_PASSWORD_FORGOT_TOKEN = 'REPLACE INTO passwordForgotTokens' +
-    ' (tokenId, tokenData, uid, passCode, createdAt, tries)' +
-    ' VALUES (?, ?, ?, ?, ?, ?)'
+  var CREATE_PASSWORD_FORGOT_TOKEN = 'CALL createPasswordForgotToken_1(?, ?, ?, ?, ?, ?)'
 
   MySql.prototype.createPasswordForgotToken = function (tokenId, passwordForgotToken) {
     return this.write(
@@ -246,9 +235,7 @@ module.exports = function (log, error) {
     )
   }
 
-  var CREATE_PASSWORD_CHANGE_TOKEN = 'REPLACE INTO passwordChangeTokens' +
-    ' (tokenId, tokenData, uid, createdAt)' +
-    ' VALUES (?, ?, ?, ?)'
+  var CREATE_PASSWORD_CHANGE_TOKEN = 'CALL createPasswordChangeToken_1(?, ?, ?, ?)'
 
   MySql.prototype.createPasswordChangeToken = function (tokenId, passwordChangeToken) {
     return this.write(
@@ -264,83 +251,63 @@ module.exports = function (log, error) {
 
   // READ
 
-  var ACCOUNT_EXISTS = 'SELECT uid FROM accounts WHERE normalizedEmail = LOWER(?)'
+  var ACCOUNT_EXISTS = 'CALL accountExists_1(?)'
 
   MySql.prototype.accountExists = function (emailBuffer) {
-    return this.readOne(ACCOUNT_EXISTS, emailBuffer.toString('utf8'))
+    return this.readOneFromMultipleResults(ACCOUNT_EXISTS, emailBuffer.toString('utf8'))
   }
 
-  var ACCOUNT_DEVICES = 'SELECT tokenId as id FROM sessionTokens WHERE uid = ?'
+  var ACCOUNT_DEVICES = 'CALL accountDevices_1(?)'
 
   MySql.prototype.accountDevices = function (uid) {
-    return this.read(ACCOUNT_DEVICES, uid)
+    return this.readFirstFromMultipleResults(ACCOUNT_DEVICES, uid)
   }
 
-  var SESSION_TOKEN = 'SELECT t.tokenData, t.uid, t.createdAt,' +
-    ' a.emailVerified, a.email, a.emailCode, a.verifierSetAt, a.locale' +
-    ' FROM sessionTokens t, accounts a' +
-    ' WHERE t.tokenId = ? AND t.uid = a.uid'
+  var SESSION_TOKEN = 'CALL sessionToken_1(?)'
 
   MySql.prototype.sessionToken = function (id) {
-    return this.readOne(SESSION_TOKEN, id)
+    return this.readOneFromMultipleResults(SESSION_TOKEN, id)
   }
 
-  var KEY_FETCH_TOKEN = 'SELECT t.authKey, t.uid, t.keyBundle, t.createdAt,' +
-  ' a.emailVerified, a.verifierSetAt' +
-  ' FROM keyFetchTokens t, accounts a' +
-  ' WHERE t.tokenId = ? AND t.uid = a.uid'
+  var KEY_FETCH_TOKEN = 'CALL keyFetchToken_1(?)'
 
   MySql.prototype.keyFetchToken = function (id) {
-    return this.readOne(KEY_FETCH_TOKEN, id)
+    return this.readOneFromMultipleResults(KEY_FETCH_TOKEN, id)
   }
 
-  var ACCOUNT_RESET_TOKEN = 'SELECT t.uid, t.tokenData, t.createdAt,' +
-    ' a.verifierSetAt' +
-    ' FROM accountResetTokens t, accounts a' +
-    ' WHERE t.tokenId = ? AND t.uid = a.uid'
+  var ACCOUNT_RESET_TOKEN = 'CALL accountResetToken_1(?)'
 
   MySql.prototype.accountResetToken = function (id) {
-    return this.readOne(ACCOUNT_RESET_TOKEN, id)
+    return this.readOneFromMultipleResults(ACCOUNT_RESET_TOKEN, id)
   }
 
-  var PASSWORD_FORGOT_TOKEN = 'SELECT t.tokenData, t.uid, t.createdAt,' +
-    ' t.passCode, t.tries, a.email, a.verifierSetAt' +
-    ' FROM passwordForgotTokens t, accounts a' +
-    ' WHERE t.tokenId = ? AND t.uid = a.uid'
+  var PASSWORD_FORGOT_TOKEN = 'CALL passwordForgotToken_1(?)'
 
   MySql.prototype.passwordForgotToken = function (id) {
-    return this.readOne(PASSWORD_FORGOT_TOKEN, id)
+    return this.readOneFromMultipleResults(PASSWORD_FORGOT_TOKEN, id)
   }
 
-  var PASSWORD_CHANGE_TOKEN = 'SELECT t.tokenData, t.uid, t.createdAt, a.verifierSetAt' +
-    ' FROM passwordChangeTokens t, accounts a' +
-    ' WHERE t.tokenId = ? AND t.uid = a.uid'
+  var PASSWORD_CHANGE_TOKEN = 'CALL passwordChangeToken_1(?)'
 
   MySql.prototype.passwordChangeToken = function (id) {
-    return this.readOne(PASSWORD_CHANGE_TOKEN, id)
+    return this.readOneFromMultipleResults(PASSWORD_CHANGE_TOKEN, id)
   }
 
-  var EMAIL_RECORD = 'SELECT uid, email, normalizedEmail, emailVerified, emailCode,' +
-    ' kA, wrapWrapKb, verifierVersion, verifyHash, authSalt, verifierSetAt' +
-    ' FROM accounts' +
-    ' WHERE normalizedEmail = LOWER(?)'
+  var EMAIL_RECORD = 'CALL emailRecord_1(?)'
 
   MySql.prototype.emailRecord = function (emailBuffer) {
-    return this.readOne(EMAIL_RECORD, emailBuffer.toString('utf8'))
+    return this.readOneFromMultipleResults(EMAIL_RECORD, emailBuffer.toString('utf8'))
   }
 
-  var ACCOUNT = 'SELECT uid, email, normalizedEmail, emailCode, emailVerified, kA,' +
-    ' wrapWrapKb, verifierVersion, verifyHash, authSalt, verifierSetAt, createdAt, locale' +
-    ' FROM accounts WHERE uid = ?'
+  var ACCOUNT = 'CALL account_1(?)'
 
   MySql.prototype.account = function (uid) {
-    return this.readOne(ACCOUNT, uid)
+    return this.readOneFromMultipleResults(ACCOUNT, uid)
   }
 
   // UPDATE
 
-  var UPDATE_PASSWORD_FORGOT_TOKEN = 'UPDATE passwordForgotTokens' +
-    ' SET tries = ? WHERE tokenId = ?'
+  var UPDATE_PASSWORD_FORGOT_TOKEN = 'CALL updatePasswordForgotToken_1(?, ?)'
 
   MySql.prototype.updatePasswordForgotToken = function (tokenId, token) {
     return this.write(UPDATE_PASSWORD_FORGOT_TOKEN, [token.tries, tokenId])
@@ -348,48 +315,37 @@ module.exports = function (log, error) {
 
   // DELETE
 
+  var DELETE_ACCOUNT = 'CALL deleteAccount_1(?)'
+
   MySql.prototype.deleteAccount = function (uid) {
-    return this.transaction(
-      function (connection) {
-        var tables = [
-          'sessionTokens',
-          'keyFetchTokens',
-          'accountResetTokens',
-          'passwordChangeTokens',
-          'passwordForgotTokens',
-          'accounts'
-        ]
-        var queries = deleteFromTablesWhereUid(connection, tables, uid)
-        return P.all(queries)
-      }
-    )
+    return this.write(DELETE_ACCOUNT, [uid])
   }
 
-  var DELETE_SESSION_TOKEN = 'DELETE FROM sessionTokens WHERE tokenId = ?'
+  var DELETE_SESSION_TOKEN = 'CALL deleteSessionToken_1(?)'
 
   MySql.prototype.deleteSessionToken = function (tokenId) {
     return this.write(DELETE_SESSION_TOKEN, [tokenId])
   }
 
-  var DELETE_KEY_FETCH_TOKEN = 'DELETE FROM keyFetchTokens WHERE tokenId = ?'
+  var DELETE_KEY_FETCH_TOKEN = 'CALL deleteKeyFetchToken_1(?)'
 
   MySql.prototype.deleteKeyFetchToken = function (tokenId) {
     return this.write(DELETE_KEY_FETCH_TOKEN, [tokenId])
   }
 
-  var DELETE_ACCOUNT_RESET_TOKEN = 'DELETE FROM accountResetTokens WHERE tokenId = ?'
+  var DELETE_ACCOUNT_RESET_TOKEN = 'CALL deleteAccountResetToken_1(?)'
 
   MySql.prototype.deleteAccountResetToken = function (tokenId) {
     return this.write(DELETE_ACCOUNT_RESET_TOKEN, [tokenId])
   }
 
-  var DELETE_PASSWORD_FORGOT_TOKEN = 'DELETE FROM passwordForgotTokens WHERE tokenId = ?'
+  var DELETE_PASSWORD_FORGOT_TOKEN = 'CALL deletePasswordForgotToken_1(?)'
 
   MySql.prototype.deletePasswordForgotToken = function (tokenId) {
     return this.write(DELETE_PASSWORD_FORGOT_TOKEN, [tokenId])
   }
 
-  var DELETE_PASSWORD_CHANGE_TOKEN = 'DELETE FROM passwordChangeTokens WHERE tokenId = ?'
+  var DELETE_PASSWORD_CHANGE_TOKEN = 'CALL deletePasswordChangeToken_1(?)'
 
   MySql.prototype.deletePasswordChangeToken = function (tokenId) {
     return this.write(DELETE_PASSWORD_CHANGE_TOKEN, [tokenId])
@@ -397,78 +353,37 @@ module.exports = function (log, error) {
 
   // BATCH
 
-  var RESET_ACCOUNT = 'UPDATE accounts' +
-    ' SET verifyHash = ?, authSalt = ?, wrapWrapKb = ?, verifierSetAt = ?,' +
-    ' verifierVersion = ?' +
-    ' WHERE uid = ?'
+  var RESET_ACCOUNT = 'CALL resetAccount_1(?, ?, ?, ?, ?, ?)'
 
   MySql.prototype.resetAccount = function (uid, data) {
-    return this.transaction(
-      function (connection) {
-        var tables = [
-          'sessionTokens',
-          'keyFetchTokens',
-          'accountResetTokens',
-          'passwordChangeTokens',
-          'passwordForgotTokens'
-        ]
-        var queries = deleteFromTablesWhereUid(connection, tables, uid)
-        queries.push(
-          query(
-            connection,
-            RESET_ACCOUNT,
-            [
-              data.verifyHash,
-              data.authSalt,
-              data.wrapWrapKb,
-              Date.now(),
-              data.verifierVersion,
-              uid
-            ]
-          )
-        )
-
-        return P.all(queries)
-      }
+    return this.write(
+      RESET_ACCOUNT,
+      [uid, data.verifyHash, data.authSalt, data.wrapWrapKb, Date.now(), data.verifierVersion]
     )
   }
 
-  var VERIFY_EMAIL = 'UPDATE accounts SET emailVerified = true WHERE uid = ?'
+  var VERIFY_EMAIL = 'CALL verifyEmail_1(?)'
 
   MySql.prototype.verifyEmail = function (uid) {
     return this.write(VERIFY_EMAIL, [uid])
   }
 
+  var FORGOT_PASSWORD_VERIFIED = 'CALL forgotPasswordVerified_1(?, ?, ?, ?, ?)'
+
   MySql.prototype.forgotPasswordVerified = function (tokenId, accountResetToken) {
-    return this.transaction(
-      function (connection) {
-        return P.all([
-          query(
-            connection,
-            DELETE_PASSWORD_FORGOT_TOKEN,
-            [tokenId]
-          ),
-          query(
-            connection,
-            CREATE_ACCOUNT_RESET_TOKEN,
-            [
-              accountResetToken.tokenId,
-              accountResetToken.data,
-              accountResetToken.uid,
-              accountResetToken.createdAt
-            ]
-          ),
-          query(
-            connection,
-            VERIFY_EMAIL,
-            [accountResetToken.uid]
-          )
-        ])
-      }
+    return this.write(
+      FORGOT_PASSWORD_VERIFIED,
+      [
+        tokenId,
+        accountResetToken.tokenId,
+        accountResetToken.data,
+        accountResetToken.uid,
+        accountResetToken.createdAt
+      ]
     )
   }
 
-  var UPDATE_LOCALE = 'UPDATE accounts SET locale = ? WHERE uid = ?'
+  var UPDATE_LOCALE = 'CALL updateLocale_1(?, ?)'
 
   MySql.prototype.updateLocale = function (uid, data) {
     return this.write(UPDATE_LOCALE, [data.locale, uid])
@@ -542,8 +457,23 @@ module.exports = function (log, error) {
     )
   }
 
-  MySql.prototype.readOne = function (sql, param) {
-    return this.read(sql, param).then(firstResult)
+  MySql.prototype.readOneFromMultipleResults = function (sql, param) {
+    return this.read(sql, param)
+      .then(function(results) {
+        // instead of the result being [result], it'll be [[result...]]
+        if (!results.length) { throw error.notFound() }
+        if (!results[0].length) { throw error.notFound() }
+        return results[0][0]
+      })
+  }
+
+  MySql.prototype.readFirstFromMultipleResults = function (sql, param) {
+    return this.read(sql, param)
+      .then(function(results) {
+        // instead of the result being [result], it'll be [[result...]]
+        if (!results.length) { throw error.notFound() }
+        return results[0]
+      })
   }
 
   MySql.prototype.read = function (sql, param) {
@@ -583,11 +513,6 @@ module.exports = function (log, error) {
     )
   }
 
-  function firstResult(results) {
-    if (!results.length) { throw error.notFound() }
-    return results[0]
-  }
-
   function query(connection, sql, params) {
     var d = P.defer()
     connection.query(
@@ -599,14 +524,6 @@ module.exports = function (log, error) {
       }
     )
     return d.promise
-  }
-
-  function deleteFromTablesWhereUid(connection, tables, uid) {
-    return tables.map(
-      function (table) {
-        return query(connection, 'DELETE FROM ' + table + ' WHERE uid = ?', uid)
-      }
-    )
   }
 
   function retryable(fn, errnos) {
