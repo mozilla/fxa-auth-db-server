@@ -1,3 +1,6 @@
+train-22
+  * licence, jshint miscellany
+
 train-21
   * remove patchLevel from config, now in code - #69, #70
   * update node-ass version - #75
