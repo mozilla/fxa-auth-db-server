@@ -23,7 +23,8 @@ var ACCOUNT = {
   authSalt: zeroBuffer32,
   kA: zeroBuffer32,
   wrapWrapKb: zeroBuffer32,
-  verifierSetAt: Date.now()
+  verifierSetAt: Date.now(),
+  locale : 'en_US',
 }
 
 function hex(len) {
@@ -92,7 +93,7 @@ DB.connect(config)
       test(
         'account creation',
         function (t) {
-          t.plan(31)
+          t.plan(32)
           var emailBuffer = Buffer(ACCOUNT.email)
           return db.accountExists(emailBuffer)
           .then(function(exists) {
@@ -125,8 +126,9 @@ DB.connect(config)
             t.deepEqual(account.verifyHash, ACCOUNT.verifyHash, 'verifyHash')
             t.deepEqual(account.authSalt, ACCOUNT.authSalt, 'authSalt')
             t.equal(account.verifierVersion, ACCOUNT.verifierVersion, 'verifierVersion')
+            t.ok(account.createdAt, 'createdAt has been set (to something)')
             t.equal(account.verifierSetAt, account.createdAt, 'verifierSetAt has been set to the same as createdAt')
-            t.ok(account.createdAt)
+            t.equal(account.locale, ACCOUNT.locale, 'locale')
           })
           .then(function() {
             t.pass('Retrieving account using email')
@@ -144,6 +146,7 @@ DB.connect(config)
             t.deepEqual(account.authSalt, ACCOUNT.authSalt, 'authSalt')
             t.equal(account.verifierVersion, ACCOUNT.verifierVersion, 'verifierVersion')
             t.ok(account.verifierSetAt, 'verifierSetAt is set to a truthy value')
+            // locale not returned with .emailRecord() (unlike .account() when it is)
           })
           // and we piggyback some duplicate query error handling here...
           .then(function() {
@@ -155,8 +158,8 @@ DB.connect(config)
             },
             function(err) {
               t.ok(err, 'trying to create the same account produces an error')
-              t.equal(err.code, 409, 'code')
-              t.equal(err.errno, 101, 'errno')
+              t.equal(err.code, 409, 'error code')
+              t.equal(err.errno, 101, 'error errno')
               t.equal(err.message, 'Record already exists', 'message')
               t.equal(err.error, 'Conflict', 'error')
             }
@@ -178,9 +181,9 @@ DB.connect(config)
               t.deepEqual(token.tokenData, SESSION_TOKEN.data, 'token data matches')
               t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
               t.ok(token.createdAt, 'Got a createdAt')
-              t.equal(!!token.emailVerified, ACCOUNT.emailVerified)
-              t.equal(token.email, ACCOUNT.email)
-              t.deepEqual(token.emailCode, ACCOUNT.emailCode)
+              t.equal(!!token.emailVerified, ACCOUNT.emailVerified, 'token emailVerified is same as account emailVerified')
+              t.equal(token.email, ACCOUNT.email, 'token email same as account email')
+              t.deepEqual(token.emailCode, ACCOUNT.emailCode, 'token emailCode same as account emailCode')
               t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
             })
             .then(function() {
@@ -235,30 +238,60 @@ DB.connect(config)
       test(
         'forgot password token handling',
         function (t) {
-          t.plan(10)
+          t.plan(20)
+
+          var token
+
           return db.createPasswordForgotToken(PASSWORD_FORGOT_TOKEN_ID, PASSWORD_FORGOT_TOKEN)
             .then(function(result) {
               t.deepEqual(result, {}, 'Returned an empty object on forgot password token creation')
               return db.passwordForgotToken(PASSWORD_FORGOT_TOKEN_ID)
             })
-            .then(function(token) {
+            .then(function(newToken) {
+              token = newToken
               // tokenId is not returned
               t.deepEqual(token.tokenData, PASSWORD_FORGOT_TOKEN.data, 'token data matches')
               t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
               t.ok(token.createdAt, 'Got a createdAt')
-              t.deepEqual(token.passCode, PASSWORD_FORGOT_TOKEN.passCode)
+              t.deepEqual(token.passCode, PASSWORD_FORGOT_TOKEN.passCode, 'token passCode same')
               t.equal(token.tries, PASSWORD_FORGOT_TOKEN.tries, 'Tries is correct')
-              t.equal(token.email, ACCOUNT.email)
+              t.equal(token.email, ACCOUNT.email, 'token email same as account email')
               t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
             })
             .then(function() {
+              return db.passwordForgotToken(PASSWORD_FORGOT_TOKEN_ID)
+            })
+            .then(function(newToken) {
+              token = newToken
+              // tokenId is not returned
+              t.deepEqual(token.tokenData, PASSWORD_FORGOT_TOKEN.data, 'token data matches')
+              t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
+              t.ok(token.createdAt, 'Got a createdAt')
+              t.deepEqual(token.passCode, PASSWORD_FORGOT_TOKEN.passCode, 'token passCode same')
+              t.equal(token.tries, PASSWORD_FORGOT_TOKEN.tries, 'Tries is correct')
+              t.equal(token.email, ACCOUNT.email, 'token email same as account email')
+              t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+            })
+            .then(function() {
+              // just update the tries
+              token.tries = 9
+              return db.updatePasswordForgotToken(PASSWORD_FORGOT_TOKEN_ID, token)
+            })
+            .then(function(result) {
+              // re-fetch the updated token
+              t.deepEqual(result, {}, 'The returned object from the token update is empty')
+              return db.passwordForgotToken(PASSWORD_FORGOT_TOKEN_ID)
+            })
+            .then(function(newToken) {
+              t.deepEqual(newToken.uid, ACCOUNT.uid, 'token belongs to this account')
+              t.equal(newToken.tries, 9, 'token now has had 9 tries')
               return db.deletePasswordForgotToken(PASSWORD_FORGOT_TOKEN_ID)
             })
             .then(function(result) {
               t.deepEqual(result, {}, 'Returned an empty object on forgot password token deletion')
               return db.passwordForgotToken(PASSWORD_FORGOT_TOKEN_ID)
             })
-            .then(function(token) {
+            .then(function(newToken /* unused */) {
               t.fail('Password Forgot Token should no longer exist')
             }, function(err) {
               t.pass('Password Forgot Token deleted successfully')
@@ -298,8 +331,10 @@ DB.connect(config)
       )
 
       test(
-        'email verification',
+        'email verification and locale change',
         function (t) {
+          t.plan(6)
+
           var emailBuffer = Buffer(ACCOUNT.email)
           return db.emailRecord(emailBuffer)
           .then(function(emailRecord) {
@@ -312,8 +347,17 @@ DB.connect(config)
           .then(function(account) {
             t.ok(account.emailVerified, 'account should now be emailVerified (truthy)')
             t.equal(account.emailVerified, 1, 'account should now be emailVerified (1)')
+
+            account.locale = 'en_NZ'
+            return db.updateLocale(ACCOUNT.uid, account)
           })
-          .then(function() {
+          .then(function(result) {
+            t.deepEqual(result, {}, 'Returned an empty object for updateLocale')
+            return db.account(ACCOUNT.uid)
+          })
+          .then(function(account) {
+            t.equal(account.locale, 'en_NZ', 'account should now have new locale')
+
             // test verifyEmail for a non-existant account
             return db.verifyEmail(uuid.v4('binary'))
           })
@@ -374,6 +418,7 @@ DB.connect(config)
             kA: zeroBuffer32,
             wrapWrapKb: zeroBuffer32,
             verifierSetAt: Date.now(),
+            locale: 'en_GB',
           }
           var PASSWORD_FORGOT_TOKEN_ID = hex32()
           var PASSWORD_FORGOT_TOKEN = {
