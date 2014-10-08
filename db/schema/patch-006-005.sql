@@ -1,0 +1,32 @@
+-- Revoke all access to the stored procedures for the fxa user.
+
+-- REVOKE EXECUTE ON PROCEDURE accountDevices_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE accountExists_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE accountResetToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE account_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE createAccountResetToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE createAccount_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE createKeyFetchToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE createPasswordChangeToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE createPasswordForgotToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE createSessionToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE dbMetadata_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE deleteAccountResetToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE deleteAccount_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE deleteKeyFetchToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE deletePasswordChangeToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE deletePasswordForgotToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE deleteSessionToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE emailRecord_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE forgotPasswordVerified_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE keyFetchToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE passwordChangeToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE passwordForgotToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE prune TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE resetAccount_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE sessionToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE updateLocale_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE updatePasswordForgotToken_1 TO 'fxa'@'127.0.0.1';
+-- REVOKE EXECUTE ON PROCEDURE verifyEmail_1 TO 'fxa'@'127.0.0.1';
+
+-- UPDATE dbMetadata SET value = '5' WHERE name = 'schema-patch-level';
