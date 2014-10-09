@@ -43,10 +43,22 @@ module.exports = function (fs, path, url, convict) {
       format: 'nat',
       env: 'PRUNE_EVERY',
     },
+    admin: {
+      user: {
+        doc: 'The admin user to connect to for MySql (not needed for production)',
+        default: 'root',
+        env: 'MYSQL_ADMIN_USER',
+      },
+      password: {
+        doc: 'The admin password to connect to for MySql (not needed for production)',
+        default: '',
+        env: 'MYSQL_ADMIN_PASSWORD',
+      },
+    },
     master: {
       user: {
         doc: 'The user to connect to for MySql',
-        default: 'root',
+        default: 'fxa',
         env: 'MYSQL_USER',
       },
       password: {
@@ -92,7 +104,7 @@ module.exports = function (fs, path, url, convict) {
     slave: {
       user: {
         doc: 'The user to connect to for MySql',
-        default: 'root',
+        default: 'fxa',
         env: 'MYSQL_SLAVE_USER',
       },
       password: {

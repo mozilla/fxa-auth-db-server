@@ -41,9 +41,9 @@ DB.connect(config)
                 t.plan(5)
                 t.ok(err, 'we have an error')
                 t.equal(err.code, 500)
-                t.equal(err.errno, 1146)
+                t.equal(err.errno, 1142)
                 t.equal(err.error, 'Internal Server Error')
-                t.equal(err.message, 'ER_NO_SUCH_TABLE')
+                t.equal(err.message, 'ER_TABLEACCESS_DENIED_ERROR')
               }
             )
         }
@@ -65,9 +65,9 @@ DB.connect(config)
                 t.plan(5)
                 t.ok(err, 'we have an error')
                 t.equal(err.code, 500)
-                t.equal(err.errno, 1146)
+                t.equal(err.errno, 1142)
                 t.equal(err.error, 'Internal Server Error')
-                t.equal(err.message, 'ER_NO_SUCH_TABLE')
+                t.equal(err.message, 'ER_TABLEACCESS_DENIED_ERROR')
               }
             )
         }
@@ -105,9 +105,9 @@ DB.connect(config)
                 t.plan(5)
                 t.ok(err, 'we have an error')
                 t.equal(err.code, 500)
-                t.equal(err.errno, 1146)
+                t.equal(err.errno, 1142)
                 t.equal(err.error, 'Internal Server Error')
-                t.equal(err.message, 'ER_NO_SUCH_TABLE')
+                t.equal(err.message, 'ER_TABLEACCESS_DENIED_ERROR')
               }
             )
         }
@@ -131,15 +131,15 @@ DB.connect(config)
                 function(err) {
                   t.ok(true, 'we got an error')
                   t.equal(err.code, 500)
-                  t.equal(err.errno, 1146)
+                  t.equal(err.errno, 1142)
                   t.equal(err.error, 'Internal Server Error')
-                  t.equal(err.message, 'ER_NO_SUCH_TABLE')
+                  t.equal(err.message, 'ER_TABLEACCESS_DENIED_ERROR')
                   throw err
                 }
               )
           }
 
-          db.retryable_(writer, [ 1146 ])
+          db.retryable_(writer, [ 1142 ])
             .then(
               function(result) {
                 t.fail('This should never happen, even with a retry ' + callCount)
