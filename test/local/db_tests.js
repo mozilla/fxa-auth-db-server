@@ -93,7 +93,7 @@ DB.connect(config)
       test(
         'account creation',
         function (t) {
-          t.plan(32)
+          t.plan(33)
           var emailBuffer = Buffer(ACCOUNT.email)
           return db.accountExists(emailBuffer)
           .then(function(exists) {
@@ -146,6 +146,7 @@ DB.connect(config)
             t.deepEqual(account.authSalt, ACCOUNT.authSalt, 'authSalt')
             t.equal(account.verifierVersion, ACCOUNT.verifierVersion, 'verifierVersion')
             t.ok(account.verifierSetAt, 'verifierSetAt is set to a truthy value')
+            t.equal(account.lockedAt, null, 'lockedAt is not set to anything')
             // locale not returned with .emailRecord() (unlike .account() when it is)
           })
           // and we piggyback some duplicate query error handling here...
@@ -331,9 +332,11 @@ DB.connect(config)
       )
 
       test(
-        'email verification and locale change',
+        'email verification, locale change and locked',
         function (t) {
-          t.plan(6)
+          t.plan(8)
+
+          var lockedAt = Date.now()
 
           var emailBuffer = Buffer(ACCOUNT.email)
           return db.emailRecord(emailBuffer)
@@ -358,11 +361,22 @@ DB.connect(config)
           .then(function(account) {
             t.equal(account.locale, 'en_NZ', 'account should now have new locale')
 
+            // set lockedAt
+            return db.updateLockedAt(ACCOUNT.uid, { lockedAt : lockedAt })
+          })
+          .then(function(result) {
+            t.deepEqual(result, {}, 'Returned an empty object for updateLockedAt')
+            // now check it's been saved
+            return db.emailRecord(Buffer(ACCOUNT.email))
+          })
+          .then(function(account) {
+            t.equal(account.lockedAt, lockedAt, 'account should now be locked')
+
             // test verifyEmail for a non-existant account
             return db.verifyEmail(uuid.v4('binary'))
           })
           .then(function(res) {
-            t.deepEqual(res, {}, 'No matter what happens, we get an empty object back')
+            t.deepEqual(res, {}, 'Returned an empty object for verifyEmail, for a non-existant email')
           }, function(err) {
             t.fail('We should not have failed this .verifyEmail() request')
           })
@@ -403,7 +417,7 @@ DB.connect(config)
       test(
         'db.forgotPasswordVerified',
         function (t) {
-          t.plan(12)
+          t.plan(14)
           // for this test, we are creating a new account with a different email address
           // so that we can check that emailVerified turns from false to true (since
           // we already set it to true earlier)
@@ -447,10 +461,21 @@ DB.connect(config)
             })
             .then(function(passwordForgotToken) {
               t.pass('.createPasswordForgotToken() did not error')
+              // let's also lock the account here so we can check it is unlocked after the createPasswordForgotToken()
+              return db.updateLockedAt(ACCOUNT.uid, { lockedAt : Date.now() })
+            })
+            .then(function(passwordForgotToken) {
+              t.pass('.updateLockedAt() did not error')
               return db.forgotPasswordVerified(PASSWORD_FORGOT_TOKEN_ID, ACCOUNT_RESET_TOKEN)
             })
             .then(function() {
               t.pass('.forgotPasswordVerified() did not error')
+              // now check that the forgotPasswordVerified also reset the lockedAt
+              return db.emailRecord(Buffer(ACCOUNT.email))
+            })
+            .then(function(account) {
+              t.equal(account.lockedAt, null, 'account should now be unlocked')
+              // see if this token is still there (it shouldn't be)
               return db.passwordForgotToken(PASSWORD_FORGOT_TOKEN_ID)
             })
             .then(function(token) {
@@ -474,8 +499,7 @@ DB.connect(config)
             .then(function(account) {
               t.ok(account.emailVerified, 'account should now be emailVerified (truthy)')
               t.equal(account.emailVerified, 1, 'account should now be emailVerified (1)')
-            })
-            .then(function() {
+              // now delete the accountResetToken
               return db.deleteAccountResetToken(ACCOUNT_RESET_TOKEN_ID)
             })
             .then(function(result) {
