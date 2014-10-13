@@ -107,7 +107,7 @@ module.exports = function (log, error) {
     // Select : dbMetadata
     // Fields : value
     // Where  : name = $1
-    var DB_METADATA = 'CALL dbMetadata_1(?)'
+    var DB_METADATA = 'CALL dbMetadata_v1(?)'
 
     return mysql.readFirstResult(DB_METADATA, options.patchKey)
       .then(
@@ -158,7 +158,7 @@ module.exports = function (log, error) {
 
   // Insert : accounts
   // Values : uid = $1, normalizedEmail = $2, email = $3, emailCode = $4, emailVerified = $5, kA = $6, wrapWrapKb = $7, authSalt = $8, verifierVersion = $9, verifyHash = $10, verifierSetAt = $11, createdAt = $12, locale = $13
-  var CREATE_ACCOUNT = 'CALL createAccount_1(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  var CREATE_ACCOUNT = 'CALL createAccount_v1(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
 
   MySql.prototype.createAccount = function (uid, data) {
     data.normalizedEmail = data.email
@@ -186,7 +186,7 @@ module.exports = function (log, error) {
 
   // Insert : sessionTokens
   // Values : tokenId = $1, tokenData = $2, uid = $3, createdAt = $4
-  var CREATE_SESSION_TOKEN = 'CALL createSessionToken_1(?, ?, ?, ?)'
+  var CREATE_SESSION_TOKEN = 'CALL createSessionToken_v1(?, ?, ?, ?)'
 
   MySql.prototype.createSessionToken = function (tokenId, sessionToken) {
     return this.write(
@@ -202,7 +202,7 @@ module.exports = function (log, error) {
 
   // Insert : keyFetchTokens
   // Values : tokenId = $1, authKey = $2, uid = $3, keyBundle = $4, createdAt = $5
-  var CREATE_KEY_FETCH_TOKEN = 'CALL createKeyFetchToken_1(?, ?, ?, ?, ?)'
+  var CREATE_KEY_FETCH_TOKEN = 'CALL createKeyFetchToken_v1(?, ?, ?, ?, ?)'
 
   MySql.prototype.createKeyFetchToken = function (tokenId, keyFetchToken) {
     return this.write(
@@ -219,7 +219,7 @@ module.exports = function (log, error) {
 
   // Insert : accountResetTokens
   // Values : tokenId = $1, tokenData = $2, uid = $3, createdAt = $4
-  var CREATE_ACCOUNT_RESET_TOKEN = 'CALL createAccountResetToken_1(?, ?, ?, ?)'
+  var CREATE_ACCOUNT_RESET_TOKEN = 'CALL createAccountResetToken_v1(?, ?, ?, ?)'
 
   MySql.prototype.createAccountResetToken = function (tokenId, accountResetToken) {
     return this.write(
@@ -235,7 +235,7 @@ module.exports = function (log, error) {
 
   // Insert : passwordForgotTokens
   // Values : tokenId = $1, tokenData = $2, uid = $3, passCode = $4, createdAt = $5, tries = $6
-  var CREATE_PASSWORD_FORGOT_TOKEN = 'CALL createPasswordForgotToken_1(?, ?, ?, ?, ?, ?)'
+  var CREATE_PASSWORD_FORGOT_TOKEN = 'CALL createPasswordForgotToken_v1(?, ?, ?, ?, ?, ?)'
 
   MySql.prototype.createPasswordForgotToken = function (tokenId, passwordForgotToken) {
     return this.write(
@@ -253,7 +253,7 @@ module.exports = function (log, error) {
 
   // Insert : passwordChangeTokens
   // Values : tokenId = $1, tokenData = $2, uid = $3, createdAt = $4
-  var CREATE_PASSWORD_CHANGE_TOKEN = 'CALL createPasswordChangeToken_1(?, ?, ?, ?)'
+  var CREATE_PASSWORD_CHANGE_TOKEN = 'CALL createPasswordChangeToken_v1(?, ?, ?, ?)'
 
   MySql.prototype.createPasswordChangeToken = function (tokenId, passwordChangeToken) {
     return this.write(
@@ -272,7 +272,7 @@ module.exports = function (log, error) {
   // Select : accounts
   // Fields : uid
   // Where  : normalizedEmail = LOWER($1)
-  var ACCOUNT_EXISTS = 'CALL accountExists_1(?)'
+  var ACCOUNT_EXISTS = 'CALL accountExists_v1(?)'
 
   MySql.prototype.accountExists = function (emailBuffer) {
     return this.readFirstResult(ACCOUNT_EXISTS, emailBuffer.toString('utf8'))
@@ -281,7 +281,7 @@ module.exports = function (log, error) {
   // Select : sessionTokens
   // Fields : tokenId
   // Where  : uid = $1
-  var ACCOUNT_DEVICES = 'CALL accountDevices_1(?)'
+  var ACCOUNT_DEVICES = 'CALL accountDevices_v1(?)'
 
   MySql.prototype.accountDevices = function (uid) {
     return this.readOneFromFirstResult(ACCOUNT_DEVICES, uid)
@@ -290,7 +290,7 @@ module.exports = function (log, error) {
   // Select : sessionTokens t, accounts a
   // Fields : t.tokenData, t.uid, t.createdAt, a.emailVerified, a.email, a.emailCode, a.verifierSetAt, a.locale
   // Where  : t.tokenId = $1 AND t.uid = a.uid
-  var SESSION_TOKEN = 'CALL sessionToken_1(?)'
+  var SESSION_TOKEN = 'CALL sessionToken_v1(?)'
 
   MySql.prototype.sessionToken = function (id) {
     return this.readFirstResult(SESSION_TOKEN, id)
@@ -299,7 +299,7 @@ module.exports = function (log, error) {
   // Select : keyFetchTokens t, accounts a
   // Fields : t.authKey, t.uid, t.keyBundle, t.createdAt, a.emailVerified, a.verifierSetAt
   // Where  : t.tokenId = $1 AND t.uid = a.uid
-  var KEY_FETCH_TOKEN = 'CALL keyFetchToken_1(?)'
+  var KEY_FETCH_TOKEN = 'CALL keyFetchToken_v1(?)'
 
   MySql.prototype.keyFetchToken = function (id) {
     return this.readFirstResult(KEY_FETCH_TOKEN, id)
@@ -308,7 +308,7 @@ module.exports = function (log, error) {
   // Select : accountResetTokens t, accounts a
   // Fields : t.uid, t.tokenData, t.createdAt, a.verifierSetAt
   // Where  : t.tokenId = $1 AND t.uid = a.uid
-  var ACCOUNT_RESET_TOKEN = 'CALL accountResetToken_1(?)'
+  var ACCOUNT_RESET_TOKEN = 'CALL accountResetToken_v1(?)'
 
   MySql.prototype.accountResetToken = function (id) {
     return this.readFirstResult(ACCOUNT_RESET_TOKEN, id)
@@ -317,7 +317,7 @@ module.exports = function (log, error) {
   // Select : passwordForgotToken t, accounts a
   // Fields : t.uid, t.tokenData, t.createdAt, t.passCode, t.tries, a.email, a.verifierSetAt
   // Where  : t.tokenId = $1 AND t.uid = a.uid
-  var PASSWORD_FORGOT_TOKEN = 'CALL passwordForgotToken_1(?)'
+  var PASSWORD_FORGOT_TOKEN = 'CALL passwordForgotToken_v1(?)'
   MySql.prototype.passwordForgotToken = function (id) {
     return this.readFirstResult(PASSWORD_FORGOT_TOKEN, id)
   }
@@ -325,7 +325,7 @@ module.exports = function (log, error) {
   // Select : passwordChangeToken t, accounts a
   // Fields : t.uid, t.tokenData, t.createdAt, a.verifierSetAt
   // Where  : t.tokenId = $1 AND t.uid = a.uid
-  var PASSWORD_CHANGE_TOKEN = 'CALL passwordChangeToken_1(?)'
+  var PASSWORD_CHANGE_TOKEN = 'CALL passwordChangeToken_v1(?)'
 
   MySql.prototype.passwordChangeToken = function (id) {
     return this.readFirstResult(PASSWORD_CHANGE_TOKEN, id)
@@ -334,7 +334,7 @@ module.exports = function (log, error) {
   // Select : accounts
   // Fields : uid, email, normalizedEmail, emailVerified, emailCode, kA, wrapWrapKb, verifierVersion, verifyHash, authSalt, verifierSetAt
   // Where  : accounts.normalizedEmail = LOWER($1)
-  var EMAIL_RECORD = 'CALL emailRecord_1(?)'
+  var EMAIL_RECORD = 'CALL emailRecord_v1(?)'
 
   MySql.prototype.emailRecord = function (emailBuffer) {
     return this.readFirstResult(EMAIL_RECORD, emailBuffer.toString('utf8'))
@@ -343,7 +343,7 @@ module.exports = function (log, error) {
   // Select : accounts
   // Fields : uid, email, normalizedEmail, emailVerified, emailCode, kA, wrapWrapKb, verifierVersion, verifyHash, authSalt, verifierSetAt, createdAt, locale
   // Where  : accounts.uid = LOWER($1)
-  var ACCOUNT = 'CALL account_1(?)'
+  var ACCOUNT = 'CALL account_v1(?)'
 
   MySql.prototype.account = function (uid) {
     return this.readFirstResult(ACCOUNT, uid)
@@ -354,7 +354,7 @@ module.exports = function (log, error) {
   // Update : passwordForgotTokens
   // Set    : tries = $1
   // Where  : tokenId = $2
-  var UPDATE_PASSWORD_FORGOT_TOKEN = 'CALL updatePasswordForgotToken_1(?, ?)'
+  var UPDATE_PASSWORD_FORGOT_TOKEN = 'CALL updatePasswordForgotToken_v1(?, ?)'
 
   MySql.prototype.updatePasswordForgotToken = function (tokenId, token) {
     return this.write(UPDATE_PASSWORD_FORGOT_TOKEN, [token.tries, tokenId])
@@ -364,7 +364,7 @@ module.exports = function (log, error) {
 
   // Delete : sessionTokens, keyFetchTokens, accountResetTokens, passwordChangeTokens, passwordForgotTokens, accounts
   // Where  : uid = $1
-  var DELETE_ACCOUNT = 'CALL deleteAccount_1(?)'
+  var DELETE_ACCOUNT = 'CALL deleteAccount_v1(?)'
 
   MySql.prototype.deleteAccount = function (uid) {
     return this.write(DELETE_ACCOUNT, [uid])
@@ -372,7 +372,7 @@ module.exports = function (log, error) {
 
   // Delete : sessionTokens
   // Where  : tokenId = $1
-  var DELETE_SESSION_TOKEN = 'CALL deleteSessionToken_1(?)'
+  var DELETE_SESSION_TOKEN = 'CALL deleteSessionToken_v1(?)'
 
   MySql.prototype.deleteSessionToken = function (tokenId) {
     return this.write(DELETE_SESSION_TOKEN, [tokenId])
@@ -380,7 +380,7 @@ module.exports = function (log, error) {
 
   // Delete : keyFetchTokens
   // Where  : tokenId = $1
-  var DELETE_KEY_FETCH_TOKEN = 'CALL deleteKeyFetchToken_1(?)'
+  var DELETE_KEY_FETCH_TOKEN = 'CALL deleteKeyFetchToken_v1(?)'
 
   MySql.prototype.deleteKeyFetchToken = function (tokenId) {
     return this.write(DELETE_KEY_FETCH_TOKEN, [tokenId])
@@ -388,7 +388,7 @@ module.exports = function (log, error) {
 
   // Delete : accountResetTokens
   // Where  : tokenId = $1
-  var DELETE_ACCOUNT_RESET_TOKEN = 'CALL deleteAccountResetToken_1(?)'
+  var DELETE_ACCOUNT_RESET_TOKEN = 'CALL deleteAccountResetToken_v1(?)'
 
   MySql.prototype.deleteAccountResetToken = function (tokenId) {
     return this.write(DELETE_ACCOUNT_RESET_TOKEN, [tokenId])
@@ -396,7 +396,7 @@ module.exports = function (log, error) {
 
   // Delete : passwordForgotTokens
   // Where  : tokenId = $1
-  var DELETE_PASSWORD_FORGOT_TOKEN = 'CALL deletePasswordForgotToken_1(?)'
+  var DELETE_PASSWORD_FORGOT_TOKEN = 'CALL deletePasswordForgotToken_v1(?)'
 
   MySql.prototype.deletePasswordForgotToken = function (tokenId) {
     return this.write(DELETE_PASSWORD_FORGOT_TOKEN, [tokenId])
@@ -404,7 +404,7 @@ module.exports = function (log, error) {
 
   // Delete : passwordChangeTokens
   // Where  : tokenId = $1
-  var DELETE_PASSWORD_CHANGE_TOKEN = 'CALL deletePasswordChangeToken_1(?)'
+  var DELETE_PASSWORD_CHANGE_TOKEN = 'CALL deletePasswordChangeToken_v1(?)'
 
   MySql.prototype.deletePasswordChangeToken = function (tokenId) {
     return this.write(DELETE_PASSWORD_CHANGE_TOKEN, [tokenId])
@@ -420,7 +420,7 @@ module.exports = function (log, error) {
   // Update : accounts
   // Set    : verifyHash = $2, authSalt = $3, wrapWrapKb = $4, verifierSetAt = $5, verifierVersion = $6
   // Where  : uid = $1
-  var RESET_ACCOUNT = 'CALL resetAccount_1(?, ?, ?, ?, ?, ?)'
+  var RESET_ACCOUNT = 'CALL resetAccount_v1(?, ?, ?, ?, ?, ?)'
 
   MySql.prototype.resetAccount = function (uid, data) {
     return this.write(
@@ -432,7 +432,7 @@ module.exports = function (log, error) {
   // Update : accounts
   // Set    : emailVerified = true
   // Where  : uid = $1
-  var VERIFY_EMAIL = 'CALL verifyEmail_1(?)'
+  var VERIFY_EMAIL = 'CALL verifyEmail_v1(?)'
 
   MySql.prototype.verifyEmail = function (uid) {
     return this.write(VERIFY_EMAIL, [uid])
@@ -450,7 +450,7 @@ module.exports = function (log, error) {
   // Update : accounts
   // Set    : emailVerified = true
   // Where  : uid = $4
-  var FORGOT_PASSWORD_VERIFIED = 'CALL forgotPasswordVerified_1(?, ?, ?, ?, ?)'
+  var FORGOT_PASSWORD_VERIFIED = 'CALL forgotPasswordVerified_v1(?, ?, ?, ?, ?)'
 
   MySql.prototype.forgotPasswordVerified = function (tokenId, accountResetToken) {
     return this.write(
@@ -468,7 +468,7 @@ module.exports = function (log, error) {
   // Update : accounts
   // Set    : locale = $1
   // Where  : uid = $2
-  var UPDATE_LOCALE = 'CALL updateLocale_1(?, ?)'
+  var UPDATE_LOCALE = 'CALL updateLocale_v1(?, ?)'
 
   MySql.prototype.updateLocale = function (uid, data) {
     return this.write(UPDATE_LOCALE, [data.locale, uid])
