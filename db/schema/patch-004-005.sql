@@ -2,7 +2,7 @@
 
 -- INSERTS
 
-CREATE PROCEDURE `createAccount_1` (
+CREATE PROCEDURE `createAccount_v1` (
     IN `uid` BINARY(16) ,
     IN `normalizedEmail` VARCHAR(255),
     IN `email` VARCHAR(255),
@@ -50,7 +50,7 @@ BEGIN
     );
 END;
 
-CREATE PROCEDURE `createSessionToken_1` (
+CREATE PROCEDURE `createSessionToken_v1` (
     IN tokenId BINARY(32),
     IN tokenData BINARY(32),
     IN uid BINARY(16),
@@ -71,7 +71,7 @@ BEGIN
     );
 END;
 
-CREATE PROCEDURE `createKeyFetchToken_1` (
+CREATE PROCEDURE `createKeyFetchToken_v1` (
     IN tokenId BINARY(32),
     IN authKey BINARY(32),
     IN uid BINARY(16),
@@ -95,7 +95,7 @@ BEGIN
     );
 END;
 
-CREATE PROCEDURE `createAccountResetToken_1` (
+CREATE PROCEDURE `createAccountResetToken_v1` (
     IN tokenId BINARY(32),
     IN tokenData BINARY(32),
     IN uid BINARY(16),
@@ -116,7 +116,7 @@ BEGIN
     );
 END;
 
-CREATE PROCEDURE `createPasswordForgotToken_1` (
+CREATE PROCEDURE `createPasswordForgotToken_v1` (
     IN tokenId BINARY(32),
     IN tokenData BINARY(32),
     IN uid BINARY(16),
@@ -143,7 +143,7 @@ BEGIN
     );
 END;
 
-CREATE PROCEDURE `createPasswordChangeToken_1` (
+CREATE PROCEDURE `createPasswordChangeToken_v1` (
     IN tokenId BINARY(32),
     IN tokenData BINARY(32),
     IN uid BINARY(16),
@@ -166,21 +166,21 @@ END;
 
 -- SELECTS
 
-CREATE PROCEDURE `accountExists_1` (
+CREATE PROCEDURE `accountExists_v1` (
     IN `inEmail` VARCHAR(255)
 )
 BEGIN
     SELECT uid FROM accounts WHERE normalizedEmail = LOWER(inEmail);
 END;
 
-CREATE PROCEDURE `accountDevices_1` (
+CREATE PROCEDURE `accountDevices_v1` (
     IN `inUid` BINARY(16)
 )
 BEGIN
     SELECT tokenId as id FROM sessionTokens WHERE uid = inUid;
 END;
 
-CREATE PROCEDURE `sessionToken_1` (
+CREATE PROCEDURE `sessionToken_v1` (
     IN `inTokenId` BINARY(32)
 )
 BEGIN
@@ -203,7 +203,7 @@ BEGIN
     ;
 END;
 
-CREATE PROCEDURE `keyFetchToken_1` (
+CREATE PROCEDURE `keyFetchToken_v1` (
     IN `inTokenId` BINARY(32)
 )
 BEGIN
@@ -224,7 +224,7 @@ BEGIN
     ;
 END;
 
-CREATE PROCEDURE `accountResetToken_1` (
+CREATE PROCEDURE `accountResetToken_v1` (
     IN `inTokenId` BINARY(32)
 )
 BEGIN
@@ -243,7 +243,7 @@ BEGIN
     ;
 END;
 
-CREATE PROCEDURE `passwordForgotToken_1` (
+CREATE PROCEDURE `passwordForgotToken_v1` (
     IN `inTokenId` BINARY(32)
 )
 BEGIN
@@ -265,7 +265,7 @@ BEGIN
     ;
 END;
 
-CREATE PROCEDURE `passwordChangeToken_1` (
+CREATE PROCEDURE `passwordChangeToken_v1` (
     IN `inTokenId` BINARY(32)
 )
 BEGIN
@@ -284,7 +284,7 @@ BEGIN
     ;
 END;
 
-CREATE PROCEDURE `emailRecord_1` (
+CREATE PROCEDURE `emailRecord_v1` (
     IN `inEmail` VARCHAR(255)
 )
 BEGIN
@@ -307,7 +307,7 @@ BEGIN
     ;
 END;
 
-CREATE PROCEDURE `account_1` (
+CREATE PROCEDURE `account_v1` (
     IN `inUid` BINARY(16)
 )
 BEGIN
@@ -334,7 +334,7 @@ END;
 
 -- UPDATES
 
-CREATE PROCEDURE `updatePasswordForgotToken_1` (
+CREATE PROCEDURE `updatePasswordForgotToken_v1` (
     IN `inTries` SMALLINT UNSIGNED,
     IN `inTokenId` BINARY(32)
 )
@@ -342,14 +342,14 @@ BEGIN
     UPDATE passwordForgotTokens SET tries = inTries WHERE tokenId = inTokenId;
 END;
 
-CREATE PROCEDURE `verifyEmail_1` (
+CREATE PROCEDURE `verifyEmail_v1` (
     IN `inUid` BINARY(16)
 )
 BEGIN
     UPDATE accounts SET emailVerified = true WHERE uid = inUid;
 END;
 
-CREATE PROCEDURE `forgotPasswordVerified_1` (
+CREATE PROCEDURE `forgotPasswordVerified_v1` (
     IN `inPasswordForgotTokenId` BINARY(32),
     IN `inAccountResetTokenId` BINARY(32),
     IN `inTokenData` BINARY(32),
@@ -381,7 +381,7 @@ BEGIN
 
 END;
 
-CREATE PROCEDURE `updateLocale_1` (
+CREATE PROCEDURE `updateLocale_v1` (
     IN `inLocale` VARCHAR(255),
     IN `inUid` BINARY(16)
 )
@@ -391,7 +391,7 @@ END;
 
 -- DELETES
 
-CREATE PROCEDURE `deleteAccount_1` (
+CREATE PROCEDURE `deleteAccount_v1` (
     IN `inUid` BINARY(16)
 )
 BEGIN
@@ -407,42 +407,42 @@ BEGIN
     COMMIT;
 END;
 
-CREATE PROCEDURE `deleteSessionToken_1` (
+CREATE PROCEDURE `deleteSessionToken_v1` (
     IN `inTokenId` BINARY(32)
 )
 BEGIN
     DELETE FROM sessionTokens WHERE tokenId = inTokenId;
 END;
 
-CREATE PROCEDURE `deleteKeyFetchToken_1` (
+CREATE PROCEDURE `deleteKeyFetchToken_v1` (
     IN `inTokenId` BINARY(32)
 )
 BEGIN
     DELETE FROM keyFetchTokens WHERE tokenId = inTokenId;
 END;
 
-CREATE PROCEDURE `deleteAccountResetToken_1` (
+CREATE PROCEDURE `deleteAccountResetToken_v1` (
     IN `inTokenId` BINARY(32)
 )
 BEGIN
     DELETE FROM accountResetTokens WHERE tokenId = inTokenId;
 END;
 
-CREATE PROCEDURE `deletePasswordForgotToken_1` (
+CREATE PROCEDURE `deletePasswordForgotToken_v1` (
     IN `inTokenId` BINARY(32)
 )
 BEGIN
     DELETE FROM passwordForgotTokens WHERE tokenId = inTokenId;
 END;
 
-CREATE PROCEDURE `deletePasswordChangeToken_1` (
+CREATE PROCEDURE `deletePasswordChangeToken_v1` (
     IN `inTokenId` BINARY(32)
 )
 BEGIN
     DELETE FROM passwordChangeTokens WHERE tokenId = inTokenId;
 END;
 
-CREATE PROCEDURE `resetAccount_1` (
+CREATE PROCEDURE `resetAccount_v1` (
     IN `inUid` BINARY(16),
     IN `inVerifyHash` BINARY(32),
     IN `inAuthSalt` BINARY(32),
@@ -476,7 +476,7 @@ END;
 
 -- dbMetadata
 
-CREATE PROCEDURE `dbMetadata_1` (
+CREATE PROCEDURE `dbMetadata_v1` (
     IN `inName` VARCHAR(255)
 )
 BEGIN
