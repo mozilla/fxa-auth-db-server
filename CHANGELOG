@@ -1,3 +1,7 @@
+train-24
+  * Use the DB stored procedures, instead of raw SQL - #84
+  * NOTE: This train will require the addition of stored procedures to the stage and production databases
+
 train-23
   * no-op. Rebuild to use nodejs 0.10.32
 
