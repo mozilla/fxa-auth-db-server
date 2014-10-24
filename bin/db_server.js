@@ -108,6 +108,7 @@ function startServer(db) {
   api.post('/account/:id/reset', reply(db.resetAccount))
   api.post('/account/:id/verifyEmail', reply(db.verifyEmail))
   api.post('/account/:id/locale', reply(db.updateLocale))
+  api.post('/account/:id/lock', reply(db.updateLockedAt))
 
   api.get('/sessionToken/:id', reply(db.sessionToken))
   api.del('/sessionToken/:id', reply(db.deleteSessionToken))

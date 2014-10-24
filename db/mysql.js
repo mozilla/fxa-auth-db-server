@@ -332,9 +332,9 @@ module.exports = function (log, error) {
   }
 
   // Select : accounts
-  // Fields : uid, email, normalizedEmail, emailVerified, emailCode, kA, wrapWrapKb, verifierVersion, verifyHash, authSalt, verifierSetAt
+  // Fields : uid, email, normalizedEmail, emailVerified, emailCode, kA, wrapWrapKb, verifierVersion, verifyHash, authSalt, verifierSetAt, lockedAt
   // Where  : accounts.normalizedEmail = LOWER($1)
-  var EMAIL_RECORD = 'CALL emailRecord_1(?)'
+  var EMAIL_RECORD = 'CALL emailRecord_2(?)'
 
   MySql.prototype.emailRecord = function (emailBuffer) {
     return this.readFirstResult(EMAIL_RECORD, emailBuffer.toString('utf8'))
@@ -448,9 +448,9 @@ module.exports = function (log, error) {
   //
   // Step   : 3
   // Update : accounts
-  // Set    : emailVerified = true
+  // Set    : emailVerified = true, lockedAt = null
   // Where  : uid = $4
-  var FORGOT_PASSWORD_VERIFIED = 'CALL forgotPasswordVerified_1(?, ?, ?, ?, ?)'
+  var FORGOT_PASSWORD_VERIFIED = 'CALL forgotPasswordVerified_2(?, ?, ?, ?, ?)'
 
   MySql.prototype.forgotPasswordVerified = function (tokenId, accountResetToken) {
     return this.write(
@@ -472,6 +472,16 @@ module.exports = function (log, error) {
 
   MySql.prototype.updateLocale = function (uid, data) {
     return this.write(UPDATE_LOCALE, [data.locale, uid])
+  }
+
+  // Update : accounts
+  // Set    : lockedAt = $1
+  // Where  : uid = $2
+  var UPDATE_LOCKED_AT = 'CALL updateLockedAt_1(?, ?)'
+
+  MySql.prototype.updateLockedAt = function (uid, data) {
+    // even though we only want lockedAt, restify gives us data.lockedAt in an object
+    return this.write(UPDATE_LOCKED_AT, [data.lockedAt, uid])
   }
 
   // Internal
