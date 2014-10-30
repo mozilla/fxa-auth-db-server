@@ -23,9 +23,6 @@ var ACCOUNT = {
   locale : 'en_US',
 }
 
-console.log('ACCOUNT.uid', ACCOUNT.uid)
-console.log('typeof ACCOUNT.uid', typeof ACCOUNT.uid)
-
 function hex(len) {
   return Buffer(crypto.randomBytes(len).toString('hex'), 'hex')
 }
@@ -102,11 +99,9 @@ module.exports = function(config, DB) {
               t.pass('ok, account could not be found')
             })
             .then(function() {
-              console.log(1)
               return db.createAccount(ACCOUNT.uid, ACCOUNT)
             })
             .then(function(account) {
-              console.log(2)
               t.deepEqual(account, {}, 'Returned an empty object on account creation')
               var emailBuffer = Buffer(ACCOUNT.email)
               return db.accountExists(emailBuffer)
@@ -361,9 +356,7 @@ module.exports = function(config, DB) {
               t.equal(account.locale, 'en_NZ', 'account should now have new locale')
 
               // test verifyEmail for a non-existant account
-              var p = db.verifyEmail(uuid.v4('binary'))
-              p.then(console.log, console.log)
-              return p
+              return db.verifyEmail(uuid.v4('binary'))
             })
             .then(function(res) {
               t.deepEqual(res, {}, 'No matter what happens, we get an empty object back')

@@ -4,7 +4,7 @@
   "description": "Firefox Accounts DB Server",
   "main": "index.js",
   "scripts": {
-    "test": "grunt jshint"
+    "test": "grunt jshint && ./scripts/tap-coverage.js test/local"
   },
   "repository": {
     "type": "git",
@@ -20,6 +20,8 @@
     "restify": "2.8.2"
   },
   "devDependencies": {
+    "ass": "git://github.com/jrgm/ass.git#5be99ee",
+    "bluebird": "1.2.2",
     "grunt": "0.4.5",
     "grunt-contrib-jshint": "0.10.0",
     "grunt-copyright": "0.1.0",

@@ -9,6 +9,7 @@ function AppError(options) {
   this.errno = options.errno
   this.error = options.error
   this.code = options.code
+  if (options.stack) this.stack = options.stack
 }
 inherits(AppError, Error)
 
@@ -34,6 +35,18 @@ AppError.notFound = function () {
       error: 'Not Found',
       errno: 116,
       message: 'Not Found'
+    }
+  )
+}
+
+AppError.wrap = function (err) {
+  return new AppError(
+    {
+      code: 500,
+      error: 'Internal Server Error',
+      errno: err.errno,
+      message: err.code,
+      stack: err.stack
     }
   )
 }
