@@ -18,7 +18,7 @@ module.exports = function (grunt) {
       },
       tests: {
         src: [
-          'test/{remote,local}/*.js'
+          'test/{remote,local,backend}/*.js'
         ],
         options: {
           pattern: 'Any copyright is dedicated to the Public Domain.'

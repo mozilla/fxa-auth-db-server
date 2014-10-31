@@ -4,7 +4,7 @@
   "description": "Firefox Accounts DB Server",
   "main": "index.js",
   "scripts": {
-    "test": "grunt jshint && ./scripts/tap-coverage.js test/local"
+    "test": "grunt && ./scripts/tap-coverage.js test/local"
   },
   "repository": {
     "type": "git",
