@@ -7,7 +7,7 @@
     "test": "grunt jshint && node ./bin/db_patcher.js >/dev/null && ./scripts/tap-coverage.js test/local test/remote",
     "start": "node ./bin/db_patcher.js >/dev/null && node ./bin/db_server.js 2>&1 | bunyan -o short -c 'this.op !== \"stat\"'",
     "outdated": "npm outdated --depth 0",
-    "shrinkwrap": "npm run outdated && npm shrinkwrap --dev && grunt validate-shrinkwrap"
+    "shrinkwrap": "npm run outdated && npm shrinkwrap --dev && grunt validate-shrinkwrap --force"
   },
   "repository": {
     "type": "git",
