@@ -349,6 +349,18 @@ module.exports = function (log, error) {
     return this.readFirstResult(ACCOUNT, uid)
   }
 
+  // Select : accounts
+  // Fields : uid
+  // Where  : uid = $1 AND verifyHash = $2
+  var CHECK_PASSWORD = 'CALL checkPassword_1(?, ?)'
+
+  MySql.prototype.checkPassword = function (uid, hash) {
+    return this.readFirstResult(
+      CHECK_PASSWORD,
+      [uid, hash.verifyHash]
+    )
+  }
+
   // UPDATE
 
   // Update : passwordForgotTokens
@@ -562,7 +574,7 @@ module.exports = function (log, error) {
   }
 
   MySql.prototype.read = function (sql, param) {
-    return this.singleQuery('SLAVE*', sql, [param])
+    return this.singleQuery('SLAVE*', sql, Array.isArray(param) ? param : [param])
       .catch(
         function (err) {
           log.error({ op: 'MySql.read', sql: sql, id: param, err: err })
