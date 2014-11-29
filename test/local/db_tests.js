@@ -91,9 +91,9 @@ DB.connect(config)
       )
 
       test(
-        'account creation',
+        'account creation and password checking',
         function (t) {
-          t.plan(32)
+          t.plan(34)
           var emailBuffer = Buffer(ACCOUNT.email)
           return db.accountExists(emailBuffer)
           .then(function(exists) {
@@ -129,6 +129,13 @@ DB.connect(config)
             t.ok(account.createdAt, 'createdAt has been set (to something)')
             t.equal(account.verifierSetAt, account.createdAt, 'verifierSetAt has been set to the same as createdAt')
             t.equal(account.locale, ACCOUNT.locale, 'locale')
+          })
+          .then(function() {
+            t.pass('Checking password')
+            return db.checkPassword(ACCOUNT.uid, {verifyHash: zeroBuffer32})
+          })
+          .then(function(account) {
+            t.deepEqual(account.uid, ACCOUNT.uid, 'uid')
           })
           .then(function() {
             t.pass('Retrieving account using email')

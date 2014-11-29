@@ -61,13 +61,19 @@ test(
 )
 
 test(
-  'add account, retrieve it, delete it',
+  'add account, check password, retrieve account, delete account',
   function (t) {
     t.plan(31)
     var user = fake.newUserDataHex()
     client.putThen('/account/' + user.accountId, user.account)
       .then(function(r) {
         respOkEmpty(t, r)
+        return client.postThen('/account/' + user.accountId + '/checkPassword', {'verifyHash': user.account.verifyHash})
+      })
+      .then(function(r) {
+        respOk(t, r)
+        var account = r.obj
+        t.equal(account.uid, user.accountId)
         return client.getThen('/account/' + user.accountId)
       })
       .then(function(r) {
