@@ -65,6 +65,7 @@ function createServer(version, db, log, port, host) {
   api.del('/account/:id', reply(db.deleteAccount))
   api.put('/account/:id', reply(db.createAccount))
   api.get('/account/:id/devices', reply(db.accountDevices))
+  api.post('/account/:id/checkPassword', reply(db.checkPassword))
   api.post('/account/:id/reset', reply(db.resetAccount))
   api.post('/account/:id/verifyEmail', reply(db.verifyEmail))
   api.post('/account/:id/locale', reply(db.updateLocale))
