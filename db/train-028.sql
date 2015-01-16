@@ -1,7 +1,10 @@
+-- make sure passwordChangeTokens(uid) is unique
+-- ie. only one row for each accounts.uid
+ALTER TABLE passwordChangeTokens ADD UNIQUE INDEX `uid` (uid);
+
 -- Add stored procedures for all the general Auth DB Server operations.
 
--- INSERTS/REPLACES
-
+DELIMITER $$
 CREATE PROCEDURE `createAccountResetToken_2` (
     IN tokenId BINARY(32),
     IN tokenData BINARY(32),
@@ -24,7 +27,10 @@ BEGIN
         createdAt
     );
 END;
+$$
+DELIMITER ;
 
+DELIMITER $$
 CREATE PROCEDURE `createPasswordForgotToken_2` (
     IN tokenId BINARY(32),
     IN tokenData BINARY(32),
@@ -53,7 +59,10 @@ BEGIN
         tries
     );
 END;
+$$
+DELIMITER ;
 
+DELIMITER $$
 CREATE PROCEDURE `createPasswordChangeToken_2` (
     IN tokenId BINARY(32),
     IN tokenData BINARY(32),
@@ -76,9 +85,10 @@ BEGIN
         createdAt
     );
 END;
+$$
+DELIMITER ;
 
--- UPDATES
-
+DELIMITER $$
 CREATE PROCEDURE `forgotPasswordVerified_2` (
     IN `inPasswordForgotTokenId` BINARY(32),
     IN `inAccountResetTokenId` BINARY(32),
@@ -119,9 +129,10 @@ BEGIN
     COMMIT;
 
 END;
+$$
+DELIMITER ;
 
--- DELETES
-
+DELIMITER $$
 CREATE PROCEDURE `deleteAccount_2` (
     IN `inUid` BINARY(16)
 )
@@ -146,7 +157,10 @@ BEGIN
     COMMIT;
 
 END;
+$$
+DELIMITER ;
 
+DELIMITER $$
 CREATE PROCEDURE `resetAccount_2` (
     IN `inUid` BINARY(16),
     IN `inVerifyHash` BINARY(32),
@@ -187,5 +201,7 @@ BEGIN
     COMMIT;
 
 END;
+$$
+DELIMITER ;
 
-UPDATE dbMetadata SET value = '7' WHERE name = 'schema-patch-level';
+UPDATE dbMetadata SET value = '6' WHERE name = 'schema-patch-level';
