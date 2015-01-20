@@ -16,18 +16,20 @@ Note: Since this project is a work in progress, these instructions are also a WI
 
 ## Configuration ##
 
-In `config.js` you can see a set of defaults for various config options. Go take a look and
-then create a new local file called `.fxa_dbrc`. This will contain a set of values to override
+In `config/config.js` you can see a set of defaults for various config options. Go take a look and
+then create a new local file called `config/local.js`. This will contain a set of values to override
 the defaults. For example, if you have a password set for your MySql `root` user, you might try
 something like this:
 
 ```json
 {
-"master": {
-    "password": "mysecret"
+  "master": {
+    "user": "root",
+    "password": "mysecret1"
   },
   "slave": {
-    "password": "mysecret"
+    "user": "root",
+    "password": "mysecret2"
   }
 }
 ```
@@ -38,7 +40,7 @@ Once you have your config in place, you can create and patch the database using 
 `db_patcher.js` command. Try this:
 
 ```sh
-node bin/db_patcher.js
+CONFIG_FILES=config/local.json node bin/db_patcher.js
 ```
 
 This should create the database (if it doesn't yet exist), and apply each patch located
@@ -50,11 +52,11 @@ database, please check your mysql configuration and connectivity on the command 
 Once the database has been created and patched, you can start the server:
 
 ```sh
-npm start
+CONFIG_FILES=config/local.json npm start
 ```
 
-Once this has started up, it will be listening on `locahost:8000` (or whatever port you
-set in your `.fxa_dbrc`..
+Once this has started up, it will be listening on `locahost:8000` (or whatever port you have
+configured in your local config file).
 
 ## Cleanup
 
