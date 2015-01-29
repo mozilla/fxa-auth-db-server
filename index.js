@@ -19,7 +19,6 @@ function createServer(db) {
                 route: req.route.name,
                 method: req.method,
                 url: req.url,
-                result: result,
                 t: Date.now() - req.time()
               }
             )

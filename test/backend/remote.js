@@ -11,22 +11,44 @@ function emailToHex(email) {
   return Buffer(email).toString('hex')
 }
 
+// Helper function that performs two tests:
+//
+// (1) checks that the response is a 200
+// (2) checks that the content-type header is correct
+//
+// Takes the test object (t) and the response object (r).
 function respOk(t, r) {
   t.equal(r.res.statusCode, 200, 'returns a 200')
   t.equal(r.res.headers['content-type'], 'application/json', 'json is returned')
 }
 
+// Helper function that performs three tests:
+//
+// (1) checks that the response is a 200
+// (2) checks that the content-type header is correct
+// (3) checks that the response was an empty object
+//
+// Takes the test object (t) and the response object (r).
 function respOkEmpty(t, r) {
   t.equal(r.res.statusCode, 200, 'returns a 200')
   t.equal(r.res.headers['content-type'], 'application/json', 'json is returned')
   t.deepEqual(r.obj, {}, 'Returned object is empty')
 }
 
+// Helper function that performs two tests:
+//
+// (1) checks that the response is a 404
+// (2) checks that the error body for a 404 is consistent
+//
+// Takes the test object (t) and the error object (err).
 function testNotFound(t, err) {
   t.equal(err.statusCode, 404, 'returns a 404')
   t.deepEqual(err.body, { message : 'Not Found' }, 'Object contains no other fields')
 }
 
+// To run these tests from a new backend, create a DB instance, start a test server
+// and pass the config containing the connection params to this function. The tests
+// will run against that server.
 module.exports = function(cfg) {
 
   var d = P.defer()

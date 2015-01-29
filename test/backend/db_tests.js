@@ -1,7 +1,6 @@
 /* Any copyright is dedicated to the Public Domain.
  * http://creativecommons.org/publicdomain/zero/1.0/ */
 
-// require('ass')
 var test = require('../ptaptest')
 var crypto = require('crypto')
 var uuid = require('uuid')
@@ -69,6 +68,8 @@ var ACCOUNT_RESET_TOKEN = {
   createdAt: Date.now()
 }
 
+// To run these tests from a new backend, pass the config and an already created
+// DB API for them to be run against.
 module.exports = function(config, DB) {
   DB.connect(config)
     .then(
