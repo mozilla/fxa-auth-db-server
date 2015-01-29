@@ -15,9 +15,15 @@ notifications:
     use_notice: false
     skip_join: false
 
+before_install:
+  - npm config set spin false
+
+before_script:
+  - npm i grunt-cli -g
+  - npm run outdated
+
 install:
   - npm install
 
 script:
   - npm test
-

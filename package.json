@@ -1,10 +1,11 @@
 {
   "name": "fxa-auth-db-server",
-  "version": "1.18.1",
+  "version": "0.24.0",
   "description": "Firefox Accounts DB Server",
   "main": "index.js",
   "scripts": {
-    "test": "grunt && ./scripts/tap-coverage.js test/local"
+    "test": "grunt && ./scripts/tap-coverage.js test/local",
+    "outdated": "npm outdated --depth 0"
   },
   "repository": {
     "type": "git",

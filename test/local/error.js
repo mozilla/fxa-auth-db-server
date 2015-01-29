@@ -5,7 +5,7 @@ require('ass')
 var test = require('../ptaptest')
 
 test(
-  'bufferize module',
+  'error module',
   function (t) {
     t.plan(22);
     var error = require('../../error')

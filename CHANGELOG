@@ -1,3 +1,44 @@
+train-24
+  * Use the DB stored procedures, instead of raw SQL - #84
+  * NOTE: This train will require the addition of stored procedures to the stage and production databases
+
+train-23
+  * no-op. Rebuild to use nodejs 0.10.32
+
+train-22
+  * licence, jshint miscellany
+
+train-21
+  * remove patchLevel from config, now in code - #69, #70
+  * update node-ass version - #75
+  * Use named mysql error constants rather than raw magic numbers - #74
+  * show prune messages at loglevel info - #73
+
+train-20
+  * add code to remove stale tokens from
+    fxa.{accountReset,passwordForgot,passwordChange}Tokens tables - issue #2
+    - adds PROCEDURE `prune` to fxa database
+    - controlled by options `pruneEvery' and `enablePruning'
+  * pass err.stack so bunyan actually prints more than "uncaughtException" - #68
+  * updates to use `mysql-patcher' modules in place of db_patcher script - #71, #72
+
+train-19
+  * Switch to convict for config
+  * update ass version
+  * update restify and request for new qs module
+
+train-18
+  * use a version of ass that does not pull in gh-badges at all: #58
+  * email argument is already a buffer: #56, #57
+  * add shrinkwrap; npm shrinkwrap --dev: #54
+  * fixed log object not having 'stat' in tests
+
+train-17
+  * added locale to accounts #53
+
+train-16
+  * NSTR
+
 train-15
   * code cleanup and test addition
 
