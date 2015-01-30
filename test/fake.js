@@ -79,6 +79,8 @@ module.exports.newUserDataHex = function() {
     createdAt: Date.now()
   }
 
+  data.unlockCode = hex16()
+
   return data
 }
 

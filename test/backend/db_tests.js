@@ -91,7 +91,7 @@ module.exports = function(config, DB) {
         test(
           'account creation',
           function (t) {
-            t.plan(32)
+            t.plan(33)
             var emailBuffer = Buffer(ACCOUNT.email)
             return db.accountExists(emailBuffer)
             .then(function(exists) {
@@ -127,6 +127,7 @@ module.exports = function(config, DB) {
               t.ok(account.createdAt, 'createdAt has been set (to something)')
               t.equal(account.verifierSetAt, account.createdAt, 'verifierSetAt has been set to the same as createdAt')
               t.equal(account.locale, ACCOUNT.locale, 'locale')
+              t.equal(account.lockedAt, null, 'lockedAt is not set to anything')
             })
             .then(function() {
               t.pass('Retrieving account using email')
@@ -450,6 +451,49 @@ module.exports = function(config, DB) {
         )
 
         test(
+          'locked accounts',
+          function (t) {
+            t.plan(5)
+
+            var lockedAt = Date.now()
+            var unlockCode = hex16()
+            var uid = Buffer(ACCOUNT.uid)
+            var email = Buffer(ACCOUNT.email)
+
+              // set lockedAt
+            return db.lockAccount(uid, { lockedAt: lockedAt, unlockCode: unlockCode })
+              .then(null, function(err) {
+                t.fail('We should not have failed this .lockAccount() request' + String(err))
+              })
+              .then(function(result) {
+                t.deepEqual(result, {}, 'Returned an empty object for lockAccount')
+                return db.account(uid)
+              })
+              .then(function(account) {
+                t.equal(account.lockedAt, lockedAt, 'account should now be locked')
+                return db.unlockCode(uid)
+              })
+              .then(function (_unlockCode) {
+                t.deepEqual(_unlockCode.unlockCode, unlockCode, 'unlockCode should be set')
+
+                // try to unlock the account
+                return db.unlockAccount(uid)
+              })
+              .then(null, function(err) {
+                t.fail('We should not have failed this .unlockAccount() request' + String(err));
+              })
+              .then(function(result) {
+                t.deepEqual(result, {}, 'Returned an empty object for unlockAccount')
+                // now check it's been saved
+                return db.emailRecord(email)
+              })
+              .then(function(account) {
+                t.equal(account.lockedAt, null, 'account should now be unlocked')
+              })
+          }
+        )
+
+        test(
           'account reset token handling',
           function (t) {
             t.plan(14)
@@ -525,7 +569,7 @@ module.exports = function(config, DB) {
         test(
           'db.forgotPasswordVerified',
           function (t) {
-            t.plan(16)
+            t.plan(18)
             // for this test, we are creating a new account with a different email address
             // so that we can check that emailVerified turns from false to true (since
             // we already set it to true earlier)
@@ -564,6 +608,7 @@ module.exports = function(config, DB) {
               uid : ACCOUNT.uid,
               createdAt: Date.now(),
             }
+            var ACCOUNT_UNLOCK_CODE = hex16()
 
             return db.createAccount(ACCOUNT.uid, ACCOUNT)
               .then(function() {
@@ -589,6 +634,20 @@ module.exports = function(config, DB) {
                 return db.createPasswordForgotToken(PASSWORD_FORGOT_TOKEN_ID, PASSWORD_FORGOT_TOKEN)
               })
               .then(function(passwordForgotToken) {
+                // let's also lock the account here so we can check it is unlocked after the createPasswordForgotToken()
+                return db.lockAccount(ACCOUNT.uid, { lockedAt: Date.now(), unlockCode: ACCOUNT_UNLOCK_CODE })
+              })
+              .then(function(passwordForgotToken) {
+                t.pass('.lockAccount() did not error')
+                return db.forgotPasswordVerified(PASSWORD_FORGOT_TOKEN_ID, ACCOUNT_RESET_TOKEN)
+              })
+              .then(function() {
+                t.pass('.forgotPasswordVerified() did not error')
+                // now check that the forgotPasswordVerified also reset the lockedAt
+                return db.emailRecord(Buffer(ACCOUNT.email))
+              })
+              .then(function(account) {
+                t.equal(account.lockedAt, null, 'account should now be unlocked')
                 t.pass('.createPasswordForgotToken() did not error')
                 return db.forgotPasswordVerified(PASSWORD_FORGOT_TOKEN_ID, ACCOUNT_RESET_TOKEN)
               })
