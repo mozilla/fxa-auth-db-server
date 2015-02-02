@@ -127,7 +127,17 @@ module.exports = function (log, error) {
             return mysql
           }
 
-          throw new Error('dbIncorrectPatchLevel')
+          // https://github.com/mozilla/fxa-auth-db-server/issues/114
+          // Change the behaviour of the DB server so that a patch level
+          // mis-match is only logged. NOTE: this is a minimal change,
+          // only for the train-29 branch.
+          log.warn({
+            op: 'MySql.connect',
+            patchLevel: mysql.patchLevel,
+            patchLevelRequired: patch.level
+          })
+
+          return mysql
         }
       )
   }
