@@ -1,4 +1,6 @@
 train-29
+  * Change the behaviour of the DB server so that a patch level
+    mis-match is only logged - #114
   * Add a CONTRIBUTING.md and an AUTHORS file - #104, #117
   * Remove references to the old .fxa_dbrc config file - #107, #113
   * Failed stored procedures return errors correctly - #95, #94
