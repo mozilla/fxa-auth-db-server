@@ -780,10 +780,17 @@ module.exports = function(config, DB) {
         test(
           'account deletion',
           function (t) {
-            t.plan(1)
-            // account should no longer exist for this email address
-            return db.deleteAccount(ACCOUNT.uid)
+            t.plan(2)
+            var uid = ACCOUNT.uid
+            var lockedAt = Date.now()
+            var unlockCode = hex16()
+            // lock the account to ensure the unlockCode is deleted
+            return db.lockAccount(uid, { lockedAt: lockedAt, unlockCode: unlockCode })
               .then(function() {
+                return db.deleteAccount(uid)
+              })
+              .then(function() {
+                // account should no longer exist for this email address
                 var emailBuffer = Buffer(ACCOUNT.email)
                 return db.accountExists(emailBuffer)
               })
@@ -791,6 +798,12 @@ module.exports = function(config, DB) {
                 t.fail('account should no longer exist for this email address')
               }, function(err) {
                 t.pass('account no longer exists for this email address')
+                return db.unlockCode(uid)
+              })
+              .then(function(unlockCode) {
+                t.fail('an unlockCode should no longer exist for this uid')
+              }, function(err) {
+                t.pass('unlockCode is deleted for this uid')
               })
           }
         )
