@@ -746,7 +746,11 @@ module.exports = function(config, DB) {
         test(
           'db.resetAccount',
           function (t) {
-            t.plan(6)
+            t.plan(9)
+            var uid = ACCOUNT.uid
+            var lockedAt = Date.now()
+            var unlockCode = hex16()
+
             return db.createSessionToken(SESSION_TOKEN_ID, SESSION_TOKEN)
               .then(function(sessionToken) {
                 t.pass('.createSessionToken() did not error')
@@ -754,11 +758,20 @@ module.exports = function(config, DB) {
               })
               .then(function() {
                 t.pass('.createAccountResetToken() did not error')
-                return db.resetAccount(ACCOUNT.uid, ACCOUNT)
+                // lock the account to ensure the unlockCode is deleted
+                return db.lockAccount(uid, { lockedAt: lockedAt, unlockCode: unlockCode })
+              })
+              .then(function() {
+                t.pass('.lockAccount() did not error')
+                return db.unlockCode(uid)
+              })
+              .then(function(unlockCode) {
+                t.ok(unlockCode.unlockCode)
+                return db.resetAccount(uid, ACCOUNT)
               })
               .then(function(sessionToken) {
                 t.pass('.resetAccount() did not error')
-                return db.accountDevices(ACCOUNT.uid)
+                return db.accountDevices(uid)
               })
               .then(function(devices) {
                 t.pass('.accountDevices() did not error')
@@ -771,8 +784,14 @@ module.exports = function(config, DB) {
               })
               .then(function(exists) {
                 t.ok(exists, 'account still exists ok')
+                return db.unlockCode(uid)
               }, function(err) {
                 t.fail('the account for this email address should still exist')
+              })
+              .then(function(unlockCode) {
+                t.fail('an unlockCode should no longer exist for this uid')
+              }, function(err) {
+                t.pass('unlockCode is deleted for this uid')
               })
           }
         )
