@@ -463,7 +463,7 @@ module.exports = function(config, DB) {
               // set lockedAt
             return db.lockAccount(uid, { lockedAt: lockedAt, unlockCode: unlockCode })
               .then(null, function(err) {
-                t.fail('We should not have failed this .lockAccount() request' + String(err))
+                t.fail('We should not have failed this .lockAccount() request')
               })
               .then(function(result) {
                 t.deepEqual(result, {}, 'Returned an empty object for lockAccount')
@@ -485,7 +485,7 @@ module.exports = function(config, DB) {
                 return db.unlockAccount(uid)
               })
               .then(null, function(err) {
-                t.fail('We should not have failed this .unlockAccount() request' + String(err));
+                t.fail('We should not have failed this .unlockAccount() request');
               })
               .then(function(result) {
                 t.deepEqual(result, {}, 'Returned an empty object for unlockAccount')
