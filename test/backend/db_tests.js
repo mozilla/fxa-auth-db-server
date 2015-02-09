@@ -453,7 +453,7 @@ module.exports = function(config, DB) {
         test(
           'locked accounts',
           function (t) {
-            t.plan(5)
+            t.plan(7)
 
             var lockedAt = Date.now()
             var unlockCode = hex16()
@@ -471,6 +471,11 @@ module.exports = function(config, DB) {
               })
               .then(function(account) {
                 t.equal(account.lockedAt, lockedAt, 'account should now be locked')
+                return db.emailRecord(email)
+              })
+              .then(function(emailRecord) {
+                t.equal(emailRecord.lockedAt, lockedAt, 'emailRecord should show the account as locked')
+
                 return db.unlockCode(uid)
               })
               .then(function (_unlockCode) {
@@ -484,11 +489,15 @@ module.exports = function(config, DB) {
               })
               .then(function(result) {
                 t.deepEqual(result, {}, 'Returned an empty object for unlockAccount')
-                // now check it's been saved
-                return db.emailRecord(email)
+                return db.account(uid)
               })
               .then(function(account) {
                 t.equal(account.lockedAt, null, 'account should now be unlocked')
+                // now check it's been saved
+                return db.emailRecord(email)
+              })
+              .then(function(emailRecord) {
+                t.equal(emailRecord.lockedAt, null, 'emailRecord should now show the account as unlocked')
               })
           }
         )
@@ -634,6 +643,7 @@ module.exports = function(config, DB) {
                 return db.createPasswordForgotToken(PASSWORD_FORGOT_TOKEN_ID, PASSWORD_FORGOT_TOKEN)
               })
               .then(function(passwordForgotToken) {
+                t.pass('.createPasswordForgotToken() did not error')
                 // let's also lock the account here so we can check it is unlocked after the createPasswordForgotToken()
                 return db.lockAccount(ACCOUNT.uid, { lockedAt: Date.now(), unlockCode: ACCOUNT_UNLOCK_CODE })
               })
@@ -648,7 +658,6 @@ module.exports = function(config, DB) {
               })
               .then(function(account) {
                 t.equal(account.lockedAt, null, 'account should now be unlocked')
-                t.pass('.createPasswordForgotToken() did not error')
                 return db.forgotPasswordVerified(PASSWORD_FORGOT_TOKEN_ID, ACCOUNT_RESET_TOKEN)
               })
               .then(function() {
@@ -766,7 +775,7 @@ module.exports = function(config, DB) {
                 return db.unlockCode(uid)
               })
               .then(function(unlockCode) {
-                t.ok(unlockCode.unlockCode)
+                t.ok(unlockCode.unlockCode, 'unlockCode is correctly returned')
                 return db.resetAccount(uid, ACCOUNT)
               })
               .then(function(sessionToken) {

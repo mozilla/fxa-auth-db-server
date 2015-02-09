@@ -144,5 +144,7 @@ module.exports.newUserDataBuffer = function() {
     createdAt: Date.now()
   }
 
+  data.unlockCode = buf16()
+
   return data
 }
