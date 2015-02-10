@@ -79,6 +79,8 @@ module.exports.newUserDataHex = function() {
     createdAt: Date.now()
   }
 
+  data.unlockCode = hex16()
+
   return data
 }
 
@@ -141,6 +143,8 @@ module.exports.newUserDataBuffer = function() {
     tries : 1,
     createdAt: Date.now()
   }
+
+  data.unlockCode = buf16()
 
   return data
 }
