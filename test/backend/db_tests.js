@@ -484,12 +484,12 @@ module.exports = function(config, DB) {
                 // try to unlock the account
                 return db.unlockAccount(uid)
               })
-              .then(null, function(err) {
-                t.fail('We should not have failed this .unlockAccount() request');
-              })
               .then(function(result) {
                 t.deepEqual(result, {}, 'Returned an empty object for unlockAccount')
+                // get this account back out
                 return db.account(uid)
+              }, function(err) {
+                t.fail('We should not have failed this .unlockAccount() request');
               })
               .then(function(account) {
                 t.equal(account.lockedAt, null, 'account should now be unlocked')
@@ -808,7 +808,7 @@ module.exports = function(config, DB) {
         test(
           'account deletion',
           function (t) {
-            t.plan(2)
+            t.plan(3)
             var uid = ACCOUNT.uid
             var lockedAt = Date.now()
             var unlockCode = hex16()
@@ -832,6 +832,14 @@ module.exports = function(config, DB) {
                 t.fail('an unlockCode should no longer exist for this uid')
               }, function(err) {
                 t.pass('unlockCode is deleted for this uid')
+
+                // try to unlock the account
+                return db.unlockAccount(uid)
+              })
+              .then(function(result) {
+                t.deepEqual(result, {}, 'Returned an empty object for unlockAccount')
+              }, function(err) {
+                t.fail('We should not have failed this .unlockAccount() request');
               })
           }
         )
