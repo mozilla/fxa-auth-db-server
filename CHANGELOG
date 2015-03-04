@@ -1,3 +1,6 @@
+train-32
+  * Add ability to mark an account as "locked" for security reasons - #123, #124
+
 train-31
   * Implemented the reverse backend, so now storage repos load the server
 
