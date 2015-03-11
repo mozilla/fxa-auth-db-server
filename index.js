@@ -16,7 +16,6 @@ function createServer(db) {
             api.emit(
               'success',
               {
-                op: 'request.summary',
                 code: 200,
                 route: req.route.name,
                 method: req.method,
@@ -39,7 +38,6 @@ function createServer(db) {
             api.emit(
               'failure',
               {
-                op: 'request.summary',
                 code: statusCode,
                 route: req.route.name,
                 method: req.method,
