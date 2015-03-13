@@ -103,6 +103,11 @@ function createServer(db) {
     }
   )
 
+  var memInterval = setInterval(function() {
+    api.emit('mem', process.memoryUsage())
+  }, 15000)
+  memInterval.unref()
+
   return api
 }
 
