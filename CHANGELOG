@@ -1,3 +1,7 @@
+train-33
+  * Tweak logging for compatibility with mozlog - #127
+  * Emit memory stats for operational logging - #128
+
 train-32
   * Add ability to mark an account as "locked" for security reasons - #123, #124
 
