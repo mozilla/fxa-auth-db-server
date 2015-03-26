@@ -33,8 +33,10 @@ module.exports.newUserDataHex = function() {
     authSalt: hex32(),
     kA: hex32(),
     wrapWrapKb: hex32(),
-    verifierSetAt: Date.now()
+    verifierSetAt: Date.now(),
+    createdAt: Date.now(),
   }
+  data.account.normalizedEmail = data.account.email.toLowerCase()
 
   // sessionToken
   data.sessionTokenId = hex32()
@@ -98,8 +100,10 @@ module.exports.newUserDataBuffer = function() {
     authSalt: buf32(),
     kA: buf32(),
     wrapWrapKb: buf32(),
-    verifierSetAt: Date.now()
+    verifierSetAt: Date.now(),
+    createdAt: Date.now(),
   }
+  data.account.normalizedEmail = data.account.email.toLowerCase()
 
   // sessionToken
   data.sessionTokenId = buf32()
