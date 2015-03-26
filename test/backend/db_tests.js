@@ -8,6 +8,7 @@ var uuid = require('uuid')
 var zeroBuffer16 = Buffer('00000000000000000000000000000000', 'hex')
 var zeroBuffer32 = Buffer('0000000000000000000000000000000000000000000000000000000000000000', 'hex')
 
+var now = Date.now()
 var ACCOUNT = {
   uid: uuid.v4('binary'),
   email: ('' + Math.random()).substr(2) + '@bar.com',
@@ -18,9 +19,12 @@ var ACCOUNT = {
   authSalt: zeroBuffer32,
   kA: zeroBuffer32,
   wrapWrapKb: zeroBuffer32,
-  verifierSetAt: Date.now(),
+  verifierSetAt: now,
+  createdAt: now,
   locale : 'en_US',
 }
+// set normalizedEmail, since the fxa-auth-server should do that for us!
+ACCOUNT.normalizedEmail = ACCOUNT.email.toLowerCase()
 
 function hex(len) {
   return Buffer(crypto.randomBytes(len).toString('hex'), 'hex')
@@ -34,7 +38,7 @@ var SESSION_TOKEN_ID = hex32()
 var SESSION_TOKEN = {
   data : hex32(),
   uid : ACCOUNT.uid,
-  createdAt: Date.now()
+  createdAt: now+1
 }
 
 var KEY_FETCH_TOKEN_ID = hex32()
@@ -42,7 +46,7 @@ var KEY_FETCH_TOKEN = {
   authKey : hex32(),
   uid : ACCOUNT.uid,
   keyBundle : hex96(),
-  createdAt: Date.now()
+  createdAt: now+2
 }
 
 var PASSWORD_FORGOT_TOKEN_ID = hex32()
@@ -51,21 +55,21 @@ var PASSWORD_FORGOT_TOKEN = {
   uid : ACCOUNT.uid,
   passCode : hex16(),
   tries : 1,
-  createdAt: Date.now()
+  createdAt: now+3
 }
 
 var PASSWORD_CHANGE_TOKEN_ID = hex32()
 var PASSWORD_CHANGE_TOKEN = {
   data : hex32(),
   uid : ACCOUNT.uid,
-  createdAt: Date.now()
+  createdAt: now+4
 }
 
 var ACCOUNT_RESET_TOKEN_ID = hex32()
 var ACCOUNT_RESET_TOKEN = {
   data : hex32(),
   uid : ACCOUNT.uid,
-  createdAt: Date.now()
+  createdAt: now+5
 }
 
 // To run these tests from a new backend, pass the config and an already created
@@ -124,7 +128,7 @@ module.exports = function(config, DB) {
               t.deepEqual(account.verifyHash, ACCOUNT.verifyHash, 'verifyHash')
               t.deepEqual(account.authSalt, ACCOUNT.authSalt, 'authSalt')
               t.equal(account.verifierVersion, ACCOUNT.verifierVersion, 'verifierVersion')
-              t.ok(account.createdAt, 'createdAt has been set (to something)')
+              t.equal(account.createdAt, ACCOUNT.createdAt, 'createdAt')
               t.equal(account.verifierSetAt, account.createdAt, 'verifierSetAt has been set to the same as createdAt')
               t.equal(account.locale, ACCOUNT.locale, 'locale')
               t.equal(account.lockedAt, null, 'lockedAt is not set to anything')
@@ -144,7 +148,7 @@ module.exports = function(config, DB) {
               t.deepEqual(account.verifyHash, ACCOUNT.verifyHash, 'verifyHash')
               t.deepEqual(account.authSalt, ACCOUNT.authSalt, 'authSalt')
               t.equal(account.verifierVersion, ACCOUNT.verifierVersion, 'verifierVersion')
-              t.ok(account.verifierSetAt, 'verifierSetAt is set to a truthy value')
+              t.equal(account.verifierSetAt, ACCOUNT.verifierSetAt, 'verifierSetAt')
               // locale not returned with .emailRecord() (unlike .account() when it is)
             })
             // and we piggyback some duplicate query error handling here...
@@ -179,11 +183,11 @@ module.exports = function(config, DB) {
                 // tokenId is not returned from db.sessionToken()
                 t.deepEqual(token.tokenData, SESSION_TOKEN.data, 'token data matches')
                 t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
-                t.ok(token.createdAt, 'Got a createdAt')
+                t.equal(token.createdAt, SESSION_TOKEN.createdAt, 'createdAt is correct')
                 t.equal(!!token.emailVerified, ACCOUNT.emailVerified, 'token emailVerified is same as account emailVerified')
                 t.equal(token.email, ACCOUNT.email, 'token email same as account email')
                 t.deepEqual(token.emailCode, ACCOUNT.emailCode, 'token emailCode same as account emailCode')
-                t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+                t.equal(token.verifierSetAt, ACCOUNT.verifierSetAt, 'verifierSetAt is correct')
               })
               .then(function() {
                 return db.deleteSessionToken(SESSION_TOKEN_ID)
@@ -213,11 +217,11 @@ module.exports = function(config, DB) {
                 // tokenId is not returned
                 t.deepEqual(token.authKey, KEY_FETCH_TOKEN.authKey, 'authKey matches')
                 t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
-                t.ok(token.createdAt, 'Got a createdAt')
-                t.equal(!!token.emailVerified, ACCOUNT.emailVerified)
+                t.equal(token.createdAt, KEY_FETCH_TOKEN.createdAt, 'createdAt is ok')
+                t.equal(!!token.emailVerified, ACCOUNT.emailVerified, 'emailVerified is correct')
                 // email is not returned
                 // emailCode is not returned
-                t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+                t.equal(token.verifierSetAt, ACCOUNT.verifierSetAt, 'verifierSetAt is correct')
               })
               .then(function() {
                 return db.deleteKeyFetchToken(KEY_FETCH_TOKEN_ID)
@@ -259,11 +263,11 @@ module.exports = function(config, DB) {
                 // tokenId is not returned
                 t.deepEqual(token.tokenData, PASSWORD_FORGOT_TOKEN.data, 'token data matches')
                 t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
-                t.ok(token.createdAt, 'Got a createdAt')
+                t.equal(token.createdAt, PASSWORD_FORGOT_TOKEN.createdAt, 'createdAt same')
                 t.deepEqual(token.passCode, PASSWORD_FORGOT_TOKEN.passCode, 'token passCode same')
                 t.equal(token.tries, PASSWORD_FORGOT_TOKEN.tries, 'Tries is correct')
                 t.equal(token.email, ACCOUNT.email, 'token email same as account email')
-                t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+                t.equal(token.verifierSetAt, ACCOUNT.verifierSetAt, 'verifierSetAt is set correctly')
               })
               .then(function() {
                 return db.passwordForgotToken(PASSWORD_FORGOT_TOKEN_ID)
@@ -273,11 +277,11 @@ module.exports = function(config, DB) {
                 // tokenId is not returned
                 t.deepEqual(token.tokenData, PASSWORD_FORGOT_TOKEN.data, 'token data matches')
                 t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
-                t.ok(token.createdAt, 'Got a createdAt')
+                t.equal(token.createdAt, PASSWORD_FORGOT_TOKEN.createdAt, 'createdAt is correct')
                 t.deepEqual(token.passCode, PASSWORD_FORGOT_TOKEN.passCode, 'token passCode same')
                 t.equal(token.tries, PASSWORD_FORGOT_TOKEN.tries, 'Tries is correct')
                 t.equal(token.email, ACCOUNT.email, 'token email same as account email')
-                t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+                t.equal(token.verifierSetAt, ACCOUNT.verifierSetAt, 'verifierSetAt is correct')
               })
               .then(function() {
                 // just update the tries
@@ -360,8 +364,8 @@ module.exports = function(config, DB) {
                 // tokenId is not returned
                 t.deepEqual(token.tokenData, PASSWORD_CHANGE_TOKEN.data, 'token data matches')
                 t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
-                t.ok(token.createdAt, 'Got a createdAt')
-                t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
+                t.equal(token.createdAt, PASSWORD_CHANGE_TOKEN.createdAt, 'createdAt is correct')
+                t.equal(token.verifierSetAt, ACCOUNT.verifierSetAt, 'verifierSetAt is set correctly')
               })
               .then(function() {
                 return db.deletePasswordChangeToken(PASSWORD_CHANGE_TOKEN_ID)
@@ -524,7 +528,7 @@ module.exports = function(config, DB) {
                 // tokenId is not returned
                 t.deepEqual(token.uid, ACCOUNT.uid, 'token belongs to this account')
                 t.deepEqual(token.tokenData, ACCOUNT_RESET_TOKEN.data, 'token data matches')
-                t.ok(token.createdAt, 'Got a createdAt')
+                t.equal(token.createdAt, ACCOUNT_RESET_TOKEN.createdAt, 'createdAt is correct')
                 t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
               })
               .then(function() {
@@ -582,6 +586,7 @@ module.exports = function(config, DB) {
             // for this test, we are creating a new account with a different email address
             // so that we can check that emailVerified turns from false to true (since
             // we already set it to true earlier)
+            var now = Date.now()
             var ACCOUNT = {
               uid: uuid.v4('binary'),
               email: ('' + Math.random()).substr(2) + '@bar.com',
@@ -592,30 +597,32 @@ module.exports = function(config, DB) {
               authSalt: zeroBuffer32,
               kA: zeroBuffer32,
               wrapWrapKb: zeroBuffer32,
-              verifierSetAt: Date.now(),
+              verifierSetAt: now,
+              createdAt: now,
               locale: 'en_GB',
             }
+            ACCOUNT.normalizedEmail = ACCOUNT.email.toLowerCase()
             var PASSWORD_FORGOT_TOKEN_ID = hex32()
             var PASSWORD_FORGOT_TOKEN = {
               data : hex32(),
               uid : ACCOUNT.uid,
               passCode : hex16(),
               tries : 1,
-              createdAt: Date.now(),
+              createdAt: now+1
             }
             var ACCOUNT_RESET_TOKEN_ID = hex32()
             var ACCOUNT_RESET_TOKEN = {
               tokenId : ACCOUNT_RESET_TOKEN_ID,
               data : hex32(),
               uid : ACCOUNT.uid,
-              createdAt: Date.now(),
+              createdAt: now+2
             }
             var THROWAWAY_ACCOUNT_RESET_TOKEN_ID = hex32()
             var THROWAWAY_ACCOUNT_RESET_TOKEN = {
               tokenId : ACCOUNT_RESET_TOKEN_ID,
               data : hex32(),
               uid : ACCOUNT.uid,
-              createdAt: Date.now(),
+              createdAt: now+3
             }
             var ACCOUNT_UNLOCK_CODE = hex16()
 
@@ -685,7 +692,7 @@ module.exports = function(config, DB) {
                 // tokenId is not returned
                 t.deepEqual(accountResetToken.uid, ACCOUNT.uid, 'token belongs to this account')
                 t.deepEqual(accountResetToken.tokenData, ACCOUNT_RESET_TOKEN.data, 'token data matches')
-                t.ok(accountResetToken.verifierSetAt, 'verifierSetAt is set to a truthy value')
+                t.equal(accountResetToken.verifierSetAt, ACCOUNT.verifierSetAt, 'verifierSetAt is set correctly')
               })
               .then(function() {
                 return db.account(ACCOUNT.uid)
