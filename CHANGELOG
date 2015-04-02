@@ -1,3 +1,8 @@
+train-34
+  * fix(db): set createdAt, verifierSetAt and normalizedEmail in the tests - #130
+  * fix(release): add tasks "grunt version" and "grunt version:patch" to create release tags - #132
+  * docs(readme): better readme for help implementing a storage backend - #129
+  
 train-33
   * Tweak logging for compatibility with mozlog - #127
   * Emit memory stats for operational logging - #128
