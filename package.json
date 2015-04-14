@@ -1,6 +1,6 @@
 {
   "name": "fxa-auth-db-server",
-  "version": "0.34.0",
+  "version": "0.35.0",
   "description": "Firefox Accounts DB Server",
   "main": "index.js",
   "scripts": {
