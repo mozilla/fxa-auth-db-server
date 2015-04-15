@@ -3,14 +3,20 @@
 
 var test = require('../ptaptest')
 var crypto = require('crypto')
-var uuid = require('uuid')
+var uuid = require('node-uuid')
 
 var zeroBuffer16 = Buffer('00000000000000000000000000000000', 'hex')
 var zeroBuffer32 = Buffer('0000000000000000000000000000000000000000000000000000000000000000', 'hex')
 
+function newUuid() {
+  // This seems to be a weird way to get the uuid in a buffer:
+  // * https://github.com/broofa/node-uuid#uuidv4options--buffer--offset
+  return uuid.v4(null, new Buffer(16))
+}
+
 var now = Date.now()
 var ACCOUNT = {
-  uid: uuid.v4('binary'),
+  uid: newUuid(),
   email: ('' + Math.random()).substr(2) + '@bar.com',
   emailCode: zeroBuffer16,
   emailVerified: false,
@@ -444,7 +450,7 @@ module.exports = function(config, DB) {
               t.equal(account.locale, 'en_NZ', 'account should now have new locale')
 
               // test verifyEmail for a non-existant account
-              return db.verifyEmail(uuid.v4('binary'))
+              return db.verifyEmail(newUuid())
             })
             .then(function(res) {
               t.deepEqual(res, {}, 'No matter what happens, we get an empty object back')
@@ -461,7 +467,7 @@ module.exports = function(config, DB) {
 
             var lockedAt = Date.now()
             var unlockCode = hex16()
-            var uid = Buffer(ACCOUNT.uid)
+            var uid = ACCOUNT.uid
             var email = Buffer(ACCOUNT.email)
 
               // set lockedAt
@@ -588,7 +594,7 @@ module.exports = function(config, DB) {
             // we already set it to true earlier)
             var now = Date.now()
             var ACCOUNT = {
-              uid: uuid.v4('binary'),
+              uid: newUuid(),
               email: ('' + Math.random()).substr(2) + '@bar.com',
               emailCode: zeroBuffer16,
               emailVerified: false,
