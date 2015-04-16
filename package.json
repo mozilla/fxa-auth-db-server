@@ -28,8 +28,8 @@
     "grunt-contrib-jshint": "0.10.0",
     "grunt-copyright": "0.1.0",
     "load-grunt-tasks": "0.6.0",
-    "tap": "0.4.12",
-    "uuid": "1.4.1"
+    "node-uuid": "1.4.3",
+    "tap": "0.4.12"
   },
   "keywords": [],
   "engines": {
