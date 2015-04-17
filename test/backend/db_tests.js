@@ -3,15 +3,12 @@
 
 var test = require('../ptaptest')
 var crypto = require('crypto')
-var uuid = require('node-uuid')
 
 var zeroBuffer16 = Buffer('00000000000000000000000000000000', 'hex')
 var zeroBuffer32 = Buffer('0000000000000000000000000000000000000000000000000000000000000000', 'hex')
 
 function newUuid() {
-  // This seems to be a weird way to get the uuid in a buffer:
-  // * https://github.com/broofa/node-uuid#uuidv4options--buffer--offset
-  return uuid.v4(null, new Buffer(16))
+  return crypto.randomBytes(16)
 }
 
 var now = Date.now()
