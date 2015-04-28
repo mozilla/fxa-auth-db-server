@@ -1,7 +1,13 @@
+train-36
+  * chore(test): Test on node.js v0.10, v0.12 and the latest io.js - #138
+  * chore(copyright): Update to grunt-copyright v0.2.0 - #137
+  * refactor(tests): Generate test UIDs a different way (from crypto.randomBytes) - #136
+  * docs(db): Add docs to help with developing the db repos - #126
+
 train-35
   * fix(shrinkwrap): as discussed, only "top-level" repos get shrunkwrapped
   * docs(changelog): belatedly add changelog note for train-34
-  
+
 train-34
   * fix(db): set createdAt, verifierSetAt and normalizedEmail in the tests - #130
   * fix(release): add tasks "grunt version" and "grunt version:patch" to create release tags - #132
