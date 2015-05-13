@@ -4,7 +4,7 @@
 var test = require('tap').test
 
 var fake = require('../fake')
-var P = require('../../promise')
+var P = require('../../lib/promise')
 var clientThen = require('../client-then')
 
 function emailToHex(email) {
