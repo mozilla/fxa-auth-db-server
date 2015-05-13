@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 var restify = require('restify')
-var bufferize = require('./bufferize')
+var bufferize = require('./lib/bufferize')
 var version = require('./package.json').version
 
 function createServer(db) {
@@ -113,5 +113,5 @@ function createServer(db) {
 
 module.exports = {
   createServer: createServer,
-  errors: require('./error')
+  errors: require('./lib/error')
 }
