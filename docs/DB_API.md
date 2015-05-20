@@ -5,6 +5,7 @@ There are a number of methods that a DB storage backend should implement:
 * Accounts (using `uid`)
     * .createAccount(uid, data)
     * .account(uid)
+    * .checkPassword(uid, hash)
     * .verifyEmail(uid)
     * .accountDevices(uid)
     * .resetAccount(uid, data)
@@ -102,6 +103,22 @@ Returns:
 * error (can be either):
     * a `error.notFound()` if this account does not exist
     * an error from the underlying storage system
+
+## .checkPassword(uid, hash) ##
+
+Parameters:
+
+* uid - (Buffer16) the uid of the account to be queried
+* hash:
+    * verifyHash - (Buffer32)
+
+Returns:
+
+* resolves with:
+    * an empty object `{}`
+* rejects: with one of:
+    * `error.notFound()` if the credentials are invalid
+    * any error from the underlying storage engine
 
 ## .verifyEmail(uid) ##
 

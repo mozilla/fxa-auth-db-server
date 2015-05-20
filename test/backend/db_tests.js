@@ -96,9 +96,9 @@ module.exports = function(config, DB) {
         )
 
         test(
-          'account creation',
+          'account creation and password checking',
           function (t) {
-            t.plan(33)
+            t.plan(41)
             var emailBuffer = Buffer(ACCOUNT.email)
             return db.accountExists(emailBuffer)
             .then(function(exists) {
@@ -135,6 +135,26 @@ module.exports = function(config, DB) {
               t.equal(account.verifierSetAt, account.createdAt, 'verifierSetAt has been set to the same as createdAt')
               t.equal(account.locale, ACCOUNT.locale, 'locale')
               t.equal(account.lockedAt, null, 'lockedAt is not set to anything')
+            })
+            .then(function() {
+              t.pass('Checking bad password')
+              return db.checkPassword(ACCOUNT.uid, {verifyHash: Buffer(crypto.randomBytes(32))})
+            })
+            .then(function() {
+              t.fail('password check should fail')
+            }, function(err) {
+              t.ok(err, 'incorrect password produces an error')
+              t.equal(err.code, 404, 'error code')
+              t.equal(err.errno, 116, 'error errno')
+              t.equal(err.message, 'Not Found', 'message')
+              t.equal(err.error, 'Not Found', 'error')
+            })
+            .then(function() {
+              t.pass('Checking password')
+              return db.checkPassword(ACCOUNT.uid, {verifyHash: zeroBuffer32})
+            })
+            .then(function(account) {
+              t.deepEqual(account.uid, ACCOUNT.uid, 'uid')
             })
             .then(function() {
               t.pass('Retrieving account using email')

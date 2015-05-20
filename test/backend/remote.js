@@ -3,6 +3,7 @@
 
 var test = require('tap').test
 
+var crypto = require('crypto')
 var fake = require('../fake')
 var P = require('../../lib/promise')
 var clientThen = require('../client-then')
@@ -84,13 +85,26 @@ module.exports = function(cfg) {
   )
 
   test(
-    'add account, retrieve it, delete it',
+    'add account, check password, retrieve it, delete it',
     function (t) {
-      t.plan(31)
+      t.plan(35)
       var user = fake.newUserDataHex()
       client.putThen('/account/' + user.accountId, user.account)
         .then(function(r) {
           respOkEmpty(t, r)
+          var randomPassword = Buffer(crypto.randomBytes(32)).toString('hex')
+          return client.postThen('/account/' + user.accountId + '/checkPassword', {'verifyHash': randomPassword})
+        })
+        .then(function(r) {
+          t.fail('should not be here, password isn\'t valid')
+        }, function(err) {
+          t.ok(err, 'incorrect password produces an error')
+          return client.postThen('/account/' + user.accountId + '/checkPassword', {'verifyHash': user.account.verifyHash})
+        })
+        .then(function(r) {
+          respOk(t, r)
+          var account = r.obj
+          t.equal(account.uid, user.accountId)
           return client.getThen('/account/' + user.accountId)
         })
         .then(function(r) {
