@@ -12,7 +12,7 @@
     "url": "https://github.com/mozilla/fxa-auth-db-server"
   },
   "author": "Mozilla (https://mozilla.org/)",
-  "license": "MPL 2.0",
+  "license": "MPL-2.0",
   "bugs": {
     "url": "https://github.com/mozilla/fxa-auth-db-server/issues"
   },
