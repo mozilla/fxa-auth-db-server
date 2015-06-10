@@ -1,3 +1,10 @@
+train-39
+  * add check password api - #141
+  * docs(api): Server_API.md docs - #145
+  * chore(license): Update license to be SPDX compliant - #142
+  * refactor(lib): Move source files into lib/ to tidy up - #140
+  * build(travis): Test on both io.js v1 and v2 - #139
+
 train-36
   * chore(test): Test on node.js v0.10, v0.12 and the latest io.js - #138
   * chore(copyright): Update to grunt-copyright v0.2.0 - #137
