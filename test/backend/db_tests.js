@@ -41,7 +41,7 @@ var SESSION_TOKEN_ID = hex32()
 var SESSION_TOKEN = {
   data : hex32(),
   uid : ACCOUNT.uid,
-  createdAt: now+1
+  createdAt: now + 1
 }
 
 var KEY_FETCH_TOKEN_ID = hex32()
@@ -49,7 +49,7 @@ var KEY_FETCH_TOKEN = {
   authKey : hex32(),
   uid : ACCOUNT.uid,
   keyBundle : hex96(),
-  createdAt: now+2
+  createdAt: now + 2
 }
 
 var PASSWORD_FORGOT_TOKEN_ID = hex32()
@@ -58,21 +58,21 @@ var PASSWORD_FORGOT_TOKEN = {
   uid : ACCOUNT.uid,
   passCode : hex16(),
   tries : 1,
-  createdAt: now+3
+  createdAt: now + 3
 }
 
 var PASSWORD_CHANGE_TOKEN_ID = hex32()
 var PASSWORD_CHANGE_TOKEN = {
   data : hex32(),
   uid : ACCOUNT.uid,
-  createdAt: now+4
+  createdAt: now + 4
 }
 
 var ACCOUNT_RESET_TOKEN_ID = hex32()
 var ACCOUNT_RESET_TOKEN = {
   data : hex32(),
   uid : ACCOUNT.uid,
-  createdAt: now+5
+  createdAt: now + 5
 }
 
 // To run these tests from a new backend, pass the config and an already created
@@ -631,21 +631,21 @@ module.exports = function(config, DB) {
               uid : ACCOUNT.uid,
               passCode : hex16(),
               tries : 1,
-              createdAt: now+1
+              createdAt: now + 1
             }
             var ACCOUNT_RESET_TOKEN_ID = hex32()
             var ACCOUNT_RESET_TOKEN = {
               tokenId : ACCOUNT_RESET_TOKEN_ID,
               data : hex32(),
               uid : ACCOUNT.uid,
-              createdAt: now+2
+              createdAt: now + 2
             }
             var THROWAWAY_ACCOUNT_RESET_TOKEN_ID = hex32()
             var THROWAWAY_ACCOUNT_RESET_TOKEN = {
               tokenId : ACCOUNT_RESET_TOKEN_ID,
               data : hex32(),
               uid : ACCOUNT.uid,
-              createdAt: now+3
+              createdAt: now + 3
             }
             var ACCOUNT_UNLOCK_CODE = hex16()
 
