@@ -23,10 +23,11 @@
   "devDependencies": {
     "ass": "git://github.com/jrgm/ass.git#5be99ee",
     "bluebird": "1.2.2",
+    "eslint-config-fxa": "1.2.0",
     "grunt": "0.4.5",
     "grunt-bump": "0.3.0",
-    "grunt-contrib-jshint": "0.10.0",
     "grunt-copyright": "0.2.0",
+    "grunt-eslint": "14.0.0",
     "load-grunt-tasks": "0.6.0",
     "tap": "0.4.12"
   },
