@@ -85,7 +85,7 @@ module.exports = function(config, DB) {
         test(
           'ping',
           function (t) {
-            t.plan(1);
+            t.plan(1)
             return db.ping()
             .then(function(account) {
               t.pass('Got the ping ok')
@@ -516,7 +516,7 @@ module.exports = function(config, DB) {
                 // get this account back out
                 return db.account(uid)
               }, function(err) {
-                t.fail('We should not have failed this .unlockAccount() request');
+                t.fail('We should not have failed this .unlockAccount() request')
               })
               .then(function(account) {
                 t.equal(account.lockedAt, null, 'account should now be unlocked')
@@ -869,7 +869,7 @@ module.exports = function(config, DB) {
               .then(function(result) {
                 t.deepEqual(result, {}, 'Returned an empty object for unlockAccount')
               }, function(err) {
-                t.fail('We should not have failed this .unlockAccount() request');
+                t.fail('We should not have failed this .unlockAccount() request')
               })
           }
         )

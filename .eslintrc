@@ -2,4 +2,4 @@ extends: fxa/server
 
 rules:
   handle-callback-err: 0
-  semi: 0
+  semi: [2, "never"]
