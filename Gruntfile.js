@@ -4,9 +4,9 @@
 
 module.exports = function (grunt) {
 
-  require('load-grunt-tasks')(grunt);
+  require('load-grunt-tasks')(grunt)
 
-  grunt.loadTasks('grunttasks');
+  grunt.loadTasks('grunttasks')
 
-  grunt.registerTask('default', ['jshint', 'copyright']);
-};
+  grunt.registerTask('default', ['eslint', 'copyright'])
+}

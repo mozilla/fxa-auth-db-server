@@ -7,7 +7,7 @@ var test = require('../ptaptest')
 test(
   'error module',
   function (t) {
-    t.plan(22);
+    t.plan(22)
     var error = require('../../lib/error')
     t.type(error, 'function', 'error module returns a function')
 
