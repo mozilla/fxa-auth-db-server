@@ -52,6 +52,7 @@ The following datatypes are used throughout this document:
     * accountExists             : `HEAD /emailRecord/:id`
     * emailRecord               : `GET /emailRecord/:id`
     * createAccount             : `PUT /account/:id`
+    * checkPassword             : `POST /account/:id/checkPassword`
     * resetAccount              : `POST /account/:id/reset`
     * deleteAccount             : `DELETE /account/:id`
     * verifyEmail               : `POST /account/:id/verifyEmail`
@@ -340,6 +341,54 @@ Content-Length: 564
     * Conditions: if this account `uid` or `normalizedEmail` already exists
     * Content-Type : 'application/json'
     * Body : `{"message":"Not Found"}`
+* Status Code : 500 Internal Server Error
+    * Conditions: if something goes wrong on the server
+    * Content-Type : 'application/json'
+    * Body : `{"code":"InternalError","message":"...<message related to the error>..."}`
+
+## checkPassword : `POST /account/<uid>/checkPassword`
+
+Returns back the same `uid` if correct.
+
+### Example
+
+```
+curl \
+    -v \
+    -X POST \
+    -H "Content-Type: application/json" \
+    -d '{
+        "verifyHash":"5791981c2f0685aa9400597b6bee51d04c59399798e9bcf3cdbeec3d8b50971f"
+    }' \
+    http://localhost:8000/account/6044486dd15b42e08b1fb9167415b9ac/checkPassword
+```
+
+### Request
+
+* Method : POST
+* Path : `/account/<uid>/checkPassword`
+    * verifyHash : hex256
+* Params: none
+
+### Response
+
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+Content-Length: 90
+
+{
+    "uid":"6044486dd15b42e08b1fb9167415b9ac"
+}
+```
+
+* Status Code : 200 OK
+    * Content-Type : 'application/json'
+    * Body : `{ ... <see example> ... }`
+* Status Code : 400 Bad Request
+    * Conditions: if this account `uid` doesn't exist or the `password` is incorrect
+    * Content-Type : 'application/json'
+    * Body : `{"message":"Incorrect password"}`
 * Status Code : 500 Internal Server Error
     * Conditions: if something goes wrong on the server
     * Content-Type : 'application/json'

@@ -98,7 +98,7 @@ module.exports = function(config, DB) {
         test(
           'account creation and password checking',
           function (t) {
-            t.plan(41)
+            t.plan(42)
             var emailBuffer = Buffer(ACCOUNT.email)
             return db.accountExists(emailBuffer)
             .then(function(exists) {
@@ -144,10 +144,10 @@ module.exports = function(config, DB) {
               t.fail('password check should fail')
             }, function(err) {
               t.ok(err, 'incorrect password produces an error')
-              t.equal(err.code, 404, 'error code')
-              t.equal(err.errno, 116, 'error errno')
-              t.equal(err.message, 'Not Found', 'message')
-              t.equal(err.error, 'Not Found', 'error')
+              t.equal(err.code, 400, 'error code')
+              t.equal(err.errno, 103, 'error errno')
+              t.equal(err.message, 'Incorrect password', 'message')
+              t.equal(err.error, 'Bad request', 'error')
             })
             .then(function() {
               t.pass('Checking password')
@@ -155,6 +155,7 @@ module.exports = function(config, DB) {
             })
             .then(function(account) {
               t.deepEqual(account.uid, ACCOUNT.uid, 'uid')
+              t.equal(Object.keys(account).length, 1, 'Only one field (uid) was returned, nothing else')
             })
             .then(function() {
               t.pass('Retrieving account using email')
