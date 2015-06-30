@@ -1,3 +1,9 @@
+train-40
+  * feat(db-api): Add AppError.incorrectPassword for the backends to use in checkPassword - #146
+  * chore(lint): Clean up some syntax errors reported by ESLint - #147
+  * chore(lint): Remove more semi colons - #149
+  * chore(lint): Replace JSHint with ESLint - #149
+  
 train-39
   * add check password api - #141
   * docs(api): Server_API.md docs - #145
