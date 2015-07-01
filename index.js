@@ -47,7 +47,12 @@ function createServer(db) {
               }
             )
 
-            res.send(statusCode, err)
+            res.send(statusCode, {
+              message: err.message,
+              errno: err.errno,
+              error: err.error,
+              code: err.code
+            })
           }
         )
         .done(next, next)

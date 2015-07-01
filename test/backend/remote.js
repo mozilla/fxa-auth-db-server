@@ -44,7 +44,12 @@ function respOkEmpty(t, r) {
 // Takes the test object (t) and the error object (err).
 function testNotFound(t, err) {
   t.equal(err.statusCode, 404, 'returns a 404')
-  t.deepEqual(err.body, { message : 'Not Found' }, 'Object contains no other fields')
+  t.deepEqual(err.body, {
+    message: 'Not Found',
+    errno: 116,
+    error: 'Not Found',
+    code: 404
+  }, 'Object contains no other fields')
 }
 
 // To run these tests from a new backend, create a DB instance, start a test server
