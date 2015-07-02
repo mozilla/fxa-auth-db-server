@@ -52,10 +52,21 @@ function testNotFound(t, err) {
   }, 'Object contains no other fields')
 }
 
+// Helper function that tests for the server failure event.
+//
+// Takes two arguments:
+//
+// 1. the test object (t)
+// 2. the restify server object (server)
+function captureFailureEvents(t, server) {
+  server.on('failure', t.pass.bind(t, 'The server emitted the failure event'))
+}
+
 // To run these tests from a new backend, create a DB instance, start a test server
 // and pass the config containing the connection params to this function. The tests
-// will run against that server.
-module.exports = function(cfg) {
+// will run against that server. Second argument is the restify server object, for
+// testing of events via `server.on`.
+module.exports = function(cfg, server) {
 
   var d = P.defer()
 
@@ -547,6 +558,86 @@ module.exports = function(cfg) {
             t.end()
           }
         )
+    }
+  )
+
+  test(
+    'GET an unknown path',
+    function (t) {
+      t.plan(3)
+      captureFailureEvents(t, server)
+      client.getThen('/foo')
+        .then(function(r) {
+          t.fail('This request should have failed (instead it suceeded)')
+          t.end()
+        }, function(err) {
+          testNotFound(t, err)
+          t.end()
+        })
+    }
+  )
+
+  test(
+    'PUT an unknown path',
+    function (t) {
+      t.plan(3)
+      captureFailureEvents(t, server)
+      client.putThen('/bar', {})
+        .then(function(r) {
+          t.fail('This request should have failed (instead it suceeded)')
+          t.end()
+        }, function(err) {
+          testNotFound(t, err)
+          t.end()
+        })
+    }
+  )
+
+  test(
+    'POST an unknown path',
+    function (t) {
+      t.plan(3)
+      captureFailureEvents(t, server)
+      client.postThen('/baz', {})
+        .then(function(r) {
+          t.fail('This request should have failed (instead it suceeded)')
+          t.end()
+        }, function(err) {
+          testNotFound(t, err)
+          t.end()
+        })
+    }
+  )
+
+  test(
+    'DELETE an unknown path',
+    function (t) {
+      t.plan(3)
+      captureFailureEvents(t, server)
+      client.delThen('/qux')
+        .then(function(r) {
+          t.fail('This request should have failed (instead it suceeded)')
+          t.end()
+        }, function(err) {
+          testNotFound(t, err)
+          t.end()
+        })
+    }
+  )
+
+  test(
+    'HEAD an unknown path',
+    function (t) {
+      t.plan(2)
+      captureFailureEvents(t, server)
+      client.headThen('/wibble')
+        .then(function(r) {
+          t.fail('This request should have failed (instead it suceeded)')
+          t.end()
+        }, function(err) {
+          t.deepEqual(err.body, {}, 'Body is empty since this is a HEAD request')
+          t.end()
+        })
     }
   )
 
