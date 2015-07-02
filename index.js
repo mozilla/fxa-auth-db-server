@@ -5,6 +5,10 @@
 var restify = require('restify')
 var bufferize = require('./lib/bufferize')
 var version = require('./package.json').version
+var errors = require('./lib/error')
+
+var otherRoutes = /\/.+/
+var methods = [ 'get', 'put', 'post', 'del', 'head' ]
 
 function createServer(db) {
 
@@ -30,34 +34,44 @@ function createServer(db) {
               res.send(bufferize.unbuffer(result || {}))
             }
           },
-          function (err) {
-            if (typeof err !== 'object') {
-              err = { message: err || 'none' }
-            }
-            var statusCode = err.code || 500
-            api.emit(
-              'failure',
-              {
-                code: statusCode,
-                route: req.route.name,
-                method: req.method,
-                path: req.url,
-                err: err,
-                t: Date.now() - req.time(),
-              }
-            )
-
-            res.send(statusCode, {
-              message: err.message,
-              errno: err.errno,
-              error: err.error,
-              code: err.code
-            })
-          }
+          handleError.bind(null, req, res)
         )
         .done(next, next)
     }
   }
+
+  function handleError (req, res, err) {
+    if (typeof err !== 'object') {
+      err = { message: err || 'none' }
+    }
+
+    var statusCode = err.code || 500
+
+    api.emit(
+      'failure',
+      {
+        code: statusCode,
+        route: req.route.name,
+        method: req.method,
+        path: req.url,
+        err: err,
+        t: Date.now() - req.time(),
+      }
+    )
+
+    res.send(statusCode, {
+      message: err.message,
+      errno: err.errno,
+      error: err.error,
+      code: err.code
+    })
+  }
+
+  function badRoute (req, res, next) {
+    handleError(req, res, errors.notFound())
+    next()
+  }
+
   var api = restify.createServer()
   api.use(restify.bodyParser())
   api.use(bufferize.bufferizeRequest)
@@ -109,6 +123,10 @@ function createServer(db) {
     }
   )
 
+  methods.forEach(function (method) {
+    api[method](otherRoutes, badRoute)
+  })
+
   var memInterval = setInterval(function() {
     api.emit('mem', process.memoryUsage())
   }, 15000)
@@ -119,5 +137,5 @@ function createServer(db) {
 
 module.exports = {
   createServer: createServer,
-  errors: require('./lib/error')
+  errors: errors
 }
