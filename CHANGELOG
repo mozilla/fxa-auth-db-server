@@ -1,3 +1,7 @@
+train-41
+  * fix(db-api): propagate all error fields - #151 
+  * chore(travis): Tell Travis to use #fxa-bots - #152
+
 train-40
   * feat(db-api): Add AppError.incorrectPassword for the backends to use in checkPassword - #146
   * chore(lint): Clean up some syntax errors reported by ESLint - #147
