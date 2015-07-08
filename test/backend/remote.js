@@ -116,11 +116,12 @@ module.exports = function(cfg) {
           respOk(t, r)
 
           var account = r.obj
-          var fields = 'accountId,email,emailCode,kA,verifierVersion,verifyHash,authSalt'.split(',')
+          var fields = 'accountId,email,emailCode,kA,verifierVersion,authSalt'.split(',')
           fields.forEach(function(f) {
             t.equal(user.account[f], account[f], 'Both Fields ' + f + ' are the same')
           })
           t.equal(user.account.emailVerified, !!account.emailVerified, 'Both fields emailVerified are the same')
+          t.notOk(account.verifyHash, 'verifyHash field should be absent')
         }, function(err) {
           t.fail('Error for some reason:' + err)
         })
@@ -134,11 +135,12 @@ module.exports = function(cfg) {
         .then(function(r) {
           respOk(t, r)
           var account = r.obj
-          var fields = 'accountId,email,emailCode,kA,verifierVersion,verifyHash,authSalt'.split(',')
+          var fields = 'accountId,email,emailCode,kA,verifierVersion,authSalt'.split(',')
           fields.forEach(function(f) {
             t.equal(user.account[f], account[f], 'Both Fields ' + f + ' are the same')
           })
           t.equal(user.account.emailVerified, !!account.emailVerified, 'Both fields emailVerified are the same')
+          t.notOk(account.verifyHash, 'verifyHash field should be absent')
         })
         .then(function() {
           return client.delThen('/account/' + user.accountId)
