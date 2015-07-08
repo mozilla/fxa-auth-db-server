@@ -551,6 +551,77 @@ module.exports = function(cfg) {
   )
 
   test(
+    'bad get',
+    function (t) {
+      client.getThen('/foobar')
+        .then(function(r) {
+          t.fail('This request should have failed (instead it suceeded)')
+          t.end()
+        }, function(err) {
+          testNotFound(t, err)
+          t.end()
+        })
+    }
+  )
+
+  test(
+    'bad put',
+    function (t) {
+      client.putThen('/foobar', {})
+        .then(function(r) {
+          t.fail('This request should have failed (instead it suceeded)')
+          t.end()
+        }, function(err) {
+          testNotFound(t, err)
+          t.end()
+        })
+    }
+  )
+
+  test(
+    'bad post',
+    function (t) {
+      client.postThen('/foobar', {})
+        .then(function(r) {
+          t.fail('This request should have failed (instead it suceeded)')
+          t.end()
+        }, function(err) {
+          testNotFound(t, err)
+          t.end()
+        })
+    }
+  )
+
+  test(
+    'bad delete',
+    function (t) {
+      client.delThen('/foobar')
+        .then(function(r) {
+          t.fail('This request should have failed (instead it suceeded)')
+          t.end()
+        }, function(err) {
+          testNotFound(t, err)
+          t.end()
+        })
+    }
+  )
+
+  test(
+    'bad head',
+    function (t) {
+      client.headThen('/foobar')
+        .then(function(r) {
+          t.fail('This request should have failed (instead it suceeded)')
+          t.end()
+        }, function(err) {
+
+          t.deepEqual(err.body, {}, 'Body contains nothing since this is a HEAD request')
+          t.end()
+        })
+    }
+  )
+
+  test(
     'teardown',
     function (t) {
       d.resolve()
