@@ -1,3 +1,9 @@
+train-42
+  * feat(api): Test to check passwordChangeToken returns the account.email address - #153
+  * fix(db): ensure that requests for bad paths are logged - #145
+  * refactor(tests): expect verifyHash to be absent from responses - #143
+  * chore(travis): Remove chilts from travis notifications - #156
+
 train-41
   * fix(db-api): propagate all error fields - #151 
   * chore(travis): Tell Travis to use #fxa-bots - #152
