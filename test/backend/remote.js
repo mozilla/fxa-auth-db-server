@@ -180,7 +180,7 @@ module.exports = function(cfg, server) {
   test(
     'session token handling',
     function (t) {
-      t.plan(14)
+      t.plan(23)
       var user = fake.newUserDataHex()
       client.putThen('/account/' + user.accountId, user.account)
         .then(function() {
@@ -202,13 +202,35 @@ module.exports = function(cfg, server) {
           // tokenId is not returned from db.sessionToken()
           t.deepEqual(token.tokenData, user.sessionToken.data, 'token data matches')
           t.deepEqual(token.uid, user.accountId, 'token belongs to this account')
-          t.ok(token.createdAt, 'Got a createdAt')
+          t.equal(token.createdAt, user.sessionToken.createdAt, 'createdAt matches')
+          t.equal(token.userAgent, user.sessionToken.userAgent, 'userAgent matches')
+          t.equal(token.lastAccessTime, user.sessionToken.lastAccessTime, 'lastAccessTime matches')
           t.equal(!!token.emailVerified, user.account.emailVerified, 'emailVerified same as account emailVerified')
           t.equal(token.email, user.account.email, 'token.email same as account email')
           t.deepEqual(token.emailCode, user.account.emailCode, 'token emailCode same as account emailCode')
           t.ok(token.verifierSetAt, 'verifierSetAt is set to a truthy value')
 
-          // now delete it
+          // update the session token
+          return client.postThen('/sessionToken/' + user.sessionTokenId + '/update', {
+            userAgent: 'foo',
+            lastAccessTime: 42
+          })
+        })
+        .then(function(r) {
+          respOk(t, r)
+          return client.getThen('/sessionToken/' + user.sessionTokenId)
+        })
+        .then(function(r) {
+          var token = r.obj
+
+          // tokenId is not returned from db.sessionToken()
+          t.deepEqual(token.tokenData, user.sessionToken.data, 'token data matches')
+          t.deepEqual(token.uid, user.accountId, 'token belongs to this account')
+          t.equal(token.createdAt, user.sessionToken.createdAt, 'createdAt was not updated')
+          t.equal(token.userAgent, 'foo', 'userAgent was updated')
+          t.equal(token.lastAccessTime, 42, 'lastAccessTime was updated')
+
+          // delete the session token
           return client.delThen('/sessionToken/' + user.sessionTokenId)
         })
         .then(function(r) {
