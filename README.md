@@ -9,7 +9,9 @@ If you would like to run an FxA Auth DB Server, then you probably want to look a
 [FxA Auth DB MySql](http://github.com/mozilla/fxa-auth-db-mysql/) repo (for production usage) or the
 [FxA Auth DB Mem](http://github.com/mozilla/fxa-auth-db-mem/) repo (for testing purposes). Each of these repos
 implement a storage backend and will install this repo when you run `npm install` since they each import the server
-from here.
+from here. 
+
+In production environments this server is used with MySQL 5.6.21-log Community Server (GPL).
 
 ## Usage
 
